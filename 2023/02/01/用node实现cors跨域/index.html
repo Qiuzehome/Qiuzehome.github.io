@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.2">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="用node去实现cors解决跨域......">
+<meta property="og:type" content="article">
+<meta property="og:title" content="用node实现cors跨域">
+<meta property="og:url" content="http://example.com/2023/02/01/%E7%94%A8node%E5%AE%9E%E7%8E%B0cors%E8%B7%A8%E5%9F%9F/index.html">
+<meta property="og:site_name" content="Blog by ZeHome">
+<meta property="og:description" content="用node去实现cors解决跨域......">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/7f023ab315dc4493a1aa85638f21d1fd.png">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/af6fb1d47f1c44debaec5d5c5333703e.png">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/7e59f6b1d5b74dc08041a8a6923adb3d.png">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/96cdde35da8d447581ec35c0dac56e19.png">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/7310fa657eec48438ce926ce62ab0b87.png">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/1ce4db89e5da441f818d46517150be91.png">
+<meta property="article:published_time" content="2023-02-01T03:35:59.000Z">
+<meta property="article:modified_time" content="2023-02-01T03:47:01.077Z">
+<meta property="article:author" content="ZeHome">
+<meta property="article:tag" content="node">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://img-blog.csdnimg.cn/7f023ab315dc4493a1aa85638f21d1fd.png">
+
+<link rel="canonical" href="http://example.com/2023/02/01/%E7%94%A8node%E5%AE%9E%E7%8E%B0cors%E8%B7%A8%E5%9F%9F/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>用node实现cors跨域 | Blog by ZeHome</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Blog by ZeHome</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2023/02/01/%E7%94%A8node%E5%AE%9E%E7%8E%B0cors%E8%B7%A8%E5%9F%9F/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.webp">
+      <meta itemprop="name" content="ZeHome">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Blog by ZeHome">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          用node实现cors跨域
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2023-02-01 11:35:59 / 修改时间：11:47:01" itemprop="dateCreated datePublished" datetime="2023-02-01T11:35:59+08:00">2023-02-01</time>
+            </span>
+
+          
+            <div class="post-description">用node去实现cors解决跨域......</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="1-关于跨域"><a href="#1-关于跨域" class="headerlink" title="1. 关于跨域"></a>1. 关于跨域</h1><p>浏览器从一个域名的网页去请求另一个域名的资源时，域名、端口、协议任一不同，会导致跨域拿不到响应内容。<br><strong>当一个请求 url 的协议、域名、端口三者之间任意一个与当前页面 url 不同即为跨域</strong><br>https://(协议)<a target="_blank" rel="noopener" href="http://www.baidu.com(主机)8080(端口号)/">www.baidu.com(主机)8080(端口号)</a><br>早起开发者们为了解决这一问题使用了JSONP的方法进行处理（具体可看<a target="_blank" rel="noopener" href="https://blog.csdn.net/weixin_43240744/article/details/124183510?spm=1001.2014.3001.5501">JSONP的原理，以及如何使用node实现</a>）。但毕竟还是存在很多局限，于是有了cors。</p>
+<h1 id="2-CORS"><a href="#2-CORS" class="headerlink" title="2.CORS"></a>2.CORS</h1><p>当浏览器进行跨域请求的时候，会在<strong>请求里添加头部origin，表明自己协议，主机，端口。当服务器收到这个客户端发送的请求之后，如果需要允许能够访问，就需要添加头部信息Access-Control-Arrow-Origin到响应里面。浏览器收到传回来的这个头部信息就知道能不能进行跨域请求了。</strong></p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;!DOCTYPE <span class="keyword">html</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">html</span> <span class="attr">lang</span>=<span class="string">&quot;en&quot;</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">head</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">meta</span> <span class="attr">charset</span>=<span class="string">&quot;UTF-8&quot;</span> /&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">meta</span> <span class="attr">http-equiv</span>=<span class="string">&quot;X-UA-Compatible&quot;</span> <span class="attr">content</span>=<span class="string">&quot;IE=edge&quot;</span> /&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">meta</span> <span class="attr">name</span>=<span class="string">&quot;viewport&quot;</span> <span class="attr">content</span>=<span class="string">&quot;width=device-width, initial-scale=1.0&quot;</span> /&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">title</span>&gt;</span>Document<span class="tag">&lt;/<span class="name">title</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;/<span class="name">head</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">body</span>&gt;</span><span class="tag">&lt;/<span class="name">body</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">html</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">script</span> <span class="attr">src</span>=<span class="string">&quot;https://code.jquery.com/jquery-3.0.0.min.js&quot;</span>&gt;</span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">script</span>&gt;</span><span class="language-javascript"></span></span><br><span class="line"><span class="language-javascript">  $.<span class="title function_">ajax</span>(&#123; <span class="attr">type</span>: <span class="string">&quot;get&quot;</span>, <span class="attr">url</span>: <span class="string">&quot;http://127.0.0.1:8888/get&quot;</span> &#125;).<span class="title function_">then</span>(</span></span><br><span class="line"><span class="language-javascript">    <span class="function">(<span class="params">data</span>) =&gt;</span> &#123;</span></span><br><span class="line"><span class="language-javascript">      <span class="variable language_">console</span>.<span class="title function_">log</span>(data);</span></span><br><span class="line"><span class="language-javascript">    &#125;</span></span><br><span class="line"><span class="language-javascript">  );</span></span><br><span class="line"><span class="language-javascript"></span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> http = <span class="built_in">require</span>(<span class="string">&#x27;http&#x27;</span>)</span><br><span class="line"><span class="keyword">let</span> server = http.<span class="title function_">createServer</span>()</span><br><span class="line">server.<span class="title function_">listen</span>(<span class="number">8888</span>)</span><br><span class="line">server.<span class="title function_">on</span>(<span class="string">&#x27;request&#x27;</span>, <span class="function">(<span class="params">req, res</span>) =&gt;</span> &#123;</span><br><span class="line">    <span class="keyword">var</span> result = &#123;</span><br><span class="line">          <span class="attr">code</span>: <span class="number">0</span>,</span><br><span class="line">          <span class="attr">msg</span>: <span class="string">&quot;请求成功&quot;</span></span><br><span class="line">      &#125;</span><br><span class="line">      res.<span class="title function_">end</span>(<span class="title class_">JSON</span>.<span class="title function_">stringify</span>(result))</span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure>
+<p><img src="https://img-blog.csdnimg.cn/7f023ab315dc4493a1aa85638f21d1fd.png" alt="在这里插入图片描述"><br>我们在8080端口中运行一个html并且对8888端口的服务器发起请求，由于两者不在同一个端口所以发生了跨域。这段报错的意思是没有发现Access-Control-Arrow-Origin这个请求头，我们在Network里面也确实没发现这个头部。<br><img src="https://img-blog.csdnimg.cn/af6fb1d47f1c44debaec5d5c5333703e.png" alt="在这里插入图片描述"><br>针对这种情况，我们可以通过设置请求头Access-Control-Allow-Origin，允许跨域。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> server = http.<span class="title function_">createServer</span>(<span class="function">(<span class="params">req, res</span>) =&gt;</span> &#123;</span><br><span class="line">    res.<span class="title function_">writeHead</span>(<span class="number">200</span>, &#123;</span><br><span class="line">        <span class="string">&#x27;Access-Control-Allow-Origin&#x27;</span>:<span class="string">&#x27;http://127.0.0.1:8080&#x27;</span><span class="comment">//可以是*，也可以是跨域的地址</span></span><br><span class="line">    &#125;)</span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure>
+<p>这时我们再去发起请求，可以看到响应头中的Access-Control-Allow-Origin属性，指向我们的客户端地址，这里我们也可以设置*即允许所有地址。并且我们这里也不再发生跨域的错误了。<br><img src="https://img-blog.csdnimg.cn/7e59f6b1d5b74dc08041a8a6923adb3d.png" alt="在这里插入图片描述"><img src="https://img-blog.csdnimg.cn/96cdde35da8d447581ec35c0dac56e19.png" alt="在这里插入图片描述"></p>
+<h3 id="其他请求方式"><a href="#其他请求方式" class="headerlink" title="其他请求方式"></a>其他请求方式</h3><p>如果我们将请求方式换成<strong>put</strong>请求会发现，它又发生跨域了<br><img src="https://img-blog.csdnimg.cn/7310fa657eec48438ce926ce62ab0b87.png" alt="在这里插入图片描述"><br>这是因为浏览器为了<strong>防护用户恶意修改浏览器数据，使用了例如put，delete等方法，我们可以通过设置请求头字段Access-Control-Allow-Methods</strong>，使得浏览器允许这些方法跨域</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> server = http.<span class="title function_">createServer</span>(<span class="function">(<span class="params">req, res</span>) =&gt;</span> &#123;</span><br><span class="line">    res.<span class="title function_">writeHead</span>(<span class="number">200</span>, &#123;</span><br><span class="line">        <span class="string">&#x27;Access-Control-Allow-Origin&#x27;</span>: <span class="string">&#x27;http://127.0.0.1:8080&#x27;</span>,<span class="comment">//可以是*，也可以是跨域的地址</span></span><br><span class="line">        <span class="string">&#x27;Access-Control-Allow-Methods&#x27;</span>: [<span class="string">&#x27;GET&#x27;</span>, <span class="string">&#x27;POST&#x27;</span>, <span class="string">&#x27;PUT&#x27;</span>]</span><br><span class="line">    &#125;)</span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure>
+<p>这时候再去发起请求就可以正常拿到响应内容了<br><img src="https://img-blog.csdnimg.cn/1ce4db89e5da441f818d46517150be91.png" alt="在这里插入图片描述"></p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/node/" rel="tag"># node</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2023/02/01/%E9%80%9A%E8%BF%87javascript%E4%B8%8Enode%E4%BB%A3%E7%A0%81%E5%AE%9E%E7%8E%B0JSONP%E8%A7%A3%E5%86%B3%E8%B7%A8%E5%9F%9F/" rel="prev" title="通过javascript与node代码实现JSONP解决跨域">
+      <i class="fa fa-chevron-left"></i> 通过javascript与node代码实现JSONP解决跨域
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2023/02/01/https%E7%9A%84%E5%AE%89%E5%85%A8%E6%80%A7%E4%B8%8E%E6%89%A7%E8%A1%8C%E6%9C%BA%E5%88%B6/" rel="next" title="https的安全性与执行机制">
+      https的安全性与执行机制 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#1-%E5%85%B3%E4%BA%8E%E8%B7%A8%E5%9F%9F"><span class="nav-number">1.</span> <span class="nav-text">1. 关于跨域</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#2-CORS"><span class="nav-number">2.</span> <span class="nav-text">2.CORS</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%85%B6%E4%BB%96%E8%AF%B7%E6%B1%82%E6%96%B9%E5%BC%8F"><span class="nav-number">2.0.1.</span> <span class="nav-text">其他请求方式</span></a></li></ol></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="ZeHome"
+      src="/images/avatar.webp">
+  <p class="site-author-name" itemprop="name">ZeHome</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">14</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-tags">
+        <span class="site-state-item-count">6</span>
+        <span class="site-state-item-name">标签</span>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">ZeHome</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://muse.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.2">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="响应式是vue的一个重要组成部分，它实现了数据与视图的绑定......">
+<meta property="og:type" content="article">
+<meta property="og:title" content="vue3响应系统的作用与实现">
+<meta property="og:url" content="http://example.com/2023/02/01/vue3%E5%93%8D%E5%BA%94%E7%B3%BB%E7%BB%9F%E7%9A%84%E4%BD%9C%E7%94%A8%E4%B8%8E%E5%AE%9E%E7%8E%B0/index.html">
+<meta property="og:site_name" content="Blog by ZeHome">
+<meta property="og:description" content="响应式是vue的一个重要组成部分，它实现了数据与视图的绑定......">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/6444860aedc048829280a5353b78b14a.jpeg">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/2fa829f9a8ac47578f809fa9de9583f2.jpeg">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/73a73d0dfb584e3e847d8217fc0dc7c6.jpeg">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/b1da665fd27f4044b85145d552623a19.jpeg">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/186661b1f6164154801f6386257e0a4e.jpeg">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/6b41a7de060d4a82ae4d9b260cab39ff.jpeg">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/fb7aa0c63e6c49949f5e2014c0abf669.jpeg">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/afe73fa9f2014467adc764289c146717.jpeg">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/b90d82c6ca0d4dc18701954f77536322.jpeg">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/1c0ea4985e974565a1da31ab1cee4567.jpeg">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/99a539f9ad5c4211a9929f98e913aeab.jpeg">
+<meta property="article:published_time" content="2023-02-01T06:10:39.000Z">
+<meta property="article:modified_time" content="2023-02-01T06:11:21.724Z">
+<meta property="article:author" content="ZeHome">
+<meta property="article:tag" content="JavaScript">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://img-blog.csdnimg.cn/6444860aedc048829280a5353b78b14a.jpeg">
+
+<link rel="canonical" href="http://example.com/2023/02/01/vue3%E5%93%8D%E5%BA%94%E7%B3%BB%E7%BB%9F%E7%9A%84%E4%BD%9C%E7%94%A8%E4%B8%8E%E5%AE%9E%E7%8E%B0/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>vue3响应系统的作用与实现 | Blog by ZeHome</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Blog by ZeHome</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2023/02/01/vue3%E5%93%8D%E5%BA%94%E7%B3%BB%E7%BB%9F%E7%9A%84%E4%BD%9C%E7%94%A8%E4%B8%8E%E5%AE%9E%E7%8E%B0/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.webp">
+      <meta itemprop="name" content="ZeHome">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Blog by ZeHome">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          vue3响应系统的作用与实现
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2023-02-01 14:10:39 / 修改时间：14:11:21" itemprop="dateCreated datePublished" datetime="2023-02-01T14:10:39+08:00">2023-02-01</time>
+            </span>
+
+          
+            <div class="post-description">响应式是vue的一个重要组成部分，它实现了数据与视图的绑定......</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>响应式是vue的一个重要组成部分，它实现了数据与视图的绑定。接下我们就从相应数据跟副作用函数开始一步步了解vue的响应系统的设计与实现</p>
+<h2 id="副作用函数"><a href="#副作用函数" class="headerlink" title="副作用函数"></a>副作用函数</h2><p>副作用函数是指会产生副作用的函数</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">function effect()&#123;</span><br><span class="line">     document.body.innerText = &quot;hellow&quot;;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>当effect执行时，会改变body的内容，但除了effect，其他函数也可以访问到body的文本内容，所以effect函数会影响到其他函数读取body的内容，即说effect是一个副作用函数。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">let a = 1</span><br><span class="line">function effect()&#123;</span><br><span class="line">    var a = 2</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>副作用函数非常常见，像这种effect改变了其他函数也可以访问到的全局变量，影响了其他函数对它的读取，这也是一种副作用函数。可以理解为<strong>某个函数改变了其他函数对某个内容的访问结果，即这个函数是副作用函数</strong></p>
+<h2 id="响应式数据"><a href="#响应式数据" class="headerlink" title="响应式数据"></a>响应式数据</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">const obj = &#123;text:&#x27;hellow&#x27;&#125;</span><br><span class="line">function effect ()&#123;</span><br><span class="line">     document.body.innerText = obj.text;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>当effect函数执行时，会改变body的文本内容。如果obj的值变化的时候都能触发effect，从而改变body的文本内容达到改变视图的效果，那我们则称obj是一个响应数据。<br>改变obj的时候，我们会触发到它的<strong>set</strong>操作，而读取的时候会触发到<strong>get</strong>操作。</p>
+<p>如果我们可以拦截这两步操作，在读取obj.text的时候把副作用函数effect存储到一个桶里，在修改obj.text的时候再把这个副作用函数拿出来执行，便可以达到每当修改obj.text的时候都能改变视图的效果了。</p>
+<p>在vue2中，vue采用了<a target="_blank" rel="noopener" href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/defineProperty">Object.defineProperty</a>实现了响应系统，但<strong>Object.defineProperty只能监听指定key的value的变化，所以需要遍历整个对象从而监听所有key</strong>。vue3使用了<a target="_blank" rel="noopener" href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Proxy">Proxy</a>代替了defineProperty解决了这一痛点。<br>这里我们用proxy来实现</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">//用于存储副作用函数的桶</span><br><span class="line">const bucket = new Set();</span><br><span class="line">//原始数据</span><br><span class="line">const data = &#123; text: &quot;hellow&quot; &#125;;</span><br><span class="line">//对原始数据的代理</span><br><span class="line">const obj = new Proxy(data, &#123;</span><br><span class="line">  get(target, key) &#123;</span><br><span class="line">    //将副作用函数丢进bucket</span><br><span class="line">    if (effect) &#123;</span><br><span class="line">      bucket.add(effect);</span><br><span class="line">    &#125;</span><br><span class="line">    //返回读取的值</span><br><span class="line">    return target[key];</span><br><span class="line">  &#125;,</span><br><span class="line">  set(target, key, newVal) &#123;</span><br><span class="line">    //设置新属性值</span><br><span class="line">    target[key] = newVal;</span><br><span class="line">    //把副作用函数从桶取出并执行</span><br><span class="line">    bucket.forEach((fn) =&gt; fn());</span><br><span class="line">    //设置成功</span><br><span class="line">    return true;</span><br><span class="line">  &#125;,</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<p>这时候执行effect之后，再改变obj.text的值的时候，会发数据响应视图，视图改变了。成功实现了一个响应数据。</p>
+<h2 id="注册副作用函数"><a href="#注册副作用函数" class="headerlink" title="注册副作用函数"></a>注册副作用函数</h2><p>在上面代码中，我们使用effect作为副作用函数，但实际中副作用函数不一定这么命名，甚至可能是一个匿名函数，所以我们需要一个注册副作用函数的流程</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line">//用一个全局变量存储被注册的副作用函数</span><br><span class="line">let activeEffect;</span><br><span class="line">//用于注册副作用函数</span><br><span class="line">function effect(fn) &#123;</span><br><span class="line">  activeEffect = fn;</span><br><span class="line">  fn();</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">const obj = new Proxy(data, &#123;</span><br><span class="line">  get(target, key) &#123;</span><br><span class="line">    //将副作用函数丢进bucket</span><br><span class="line">    if (activeEffect) &#123;</span><br><span class="line">      bucket.add(activeEffect);</span><br><span class="line">    &#125;</span><br><span class="line">    //返回读取的值</span><br><span class="line">    return target[key];</span><br><span class="line">  &#125;,</span><br><span class="line">  set(target, key, newVal) &#123;</span><br><span class="line">    //设置新属性值</span><br><span class="line">    target[key] = newVal;</span><br><span class="line">    //把副作用函数从桶取出并执行</span><br><span class="line">    bucket.forEach((fn) =&gt; fn());</span><br><span class="line">    //设置成功</span><br><span class="line">    return true;</span><br><span class="line">  &#125;,</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line">effect(() =&gt; &#123;</span><br><span class="line">  document.body.innerText = obj.text;</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p> 这里我们定义了一个activeEffect，它的作用是用来存储被注册的副作用函数，再将effect修改为一个用来注册副作用函数的工具，这样一来无论副作用函数是什么都可以通过注册副作用函数注册后由activeEffect来表示。<br>当执行effect时，会把匿名函数赋值给activeEffect，接着执行传入的fn函数，会触发obj.text的get，从而将副作用函数放到桶中.</p>
+<h2 id="完善存放副作用函数的桶的数据结构"><a href="#完善存放副作用函数的桶的数据结构" class="headerlink" title="完善存放副作用函数的桶的数据结构"></a>完善存放副作用函数的桶的数据结构</h2><p>以上步骤一直围绕着obj.text做操作，我们的副作用函数是与之绑定的，<strong>如果我们设置了一个原先不存在的属性的话，由于它与副作用函数是没联系的，所以理论上不应该触发这个副作用函数，但实际上当我们对obj设置一个新属性的时候它触发了这个与它没联系的副作用函数</strong>。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">effect(() =&gt; &#123;</span><br><span class="line">  console.log(&#x27;effect&#x27;)</span><br><span class="line">  document.body.innerText = obj.text;</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line">obj.a = 1</span><br></pre></td></tr></table></figure>
+<p>触发obj.a = 1的时候可以看到副作用函数被触发了，这是不合理的。导致该问题的原因就是我们没有在副作用函数中明确副作用函数与被操作的字段建立联系。这会导致无论当前读取的是哪个属性，都会把副作用函数丢到桶里，设置的时候也是如此，无论是设置哪个属性都会把桶里的副作用函数拿出来执行。所以对这个桶的结构我们需要重新设计下。先看下执行副作用函数的时候其内部的关系。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">function effect()&#123;</span><br><span class="line">    document.body.innerText = obj.text</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>在这段代码中有三个角色</p>
+<ul>
+<li>代理对象obj</li>
+<li>字段名text</li>
+<li>副作用函数effect</li>
+</ul>
+<p>把target看成一个代理对象，key是被操作的字段，effectfn是副作用函数，那么它们的关系如下</p>
+<p><img src="https://img-blog.csdnimg.cn/6444860aedc048829280a5353b78b14a.jpeg" alt="请添加图片描述"></p>
+<p>如果是有两个副作用函数作用于一个字段</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">effect(function effect1() &#123;</span><br><span class="line">  obj.text;</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line">effect(function effect2() &#123;</span><br><span class="line">  obj.text;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<p>那么关系如下</p>
+<p><img src="https://img-blog.csdnimg.cn/2fa829f9a8ac47578f809fa9de9583f2.jpeg" alt="请添加图片描述"></p>
+<p>如果一个副作用函数中读取了多个属性</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">effect(function effect()&#123;</span><br><span class="line">    obj.text1</span><br><span class="line">    obj.text2</span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://img-blog.csdnimg.cn/73a73d0dfb584e3e847d8217fc0dc7c6.jpeg" alt="请添加图片描述"></p>
+<p>如果在不同副作用函数读取不同属性的话</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">effect(function effect1() &#123;</span><br><span class="line">  obj.text1;</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line">effect(function effect2() &#123;</span><br><span class="line">  obj.text2;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://img-blog.csdnimg.cn/b1da665fd27f4044b85145d552623a19.jpeg" alt="请添加图片描述"></p>
+<p>按这个关系来看，便可以解决了我们先前改变任何属性都会触发副作用函数的问题。例如这里我们读取或者设置了text1，只会触发effect1，而不会导致effect2执行。接着就来实现这个桶。</p>
+<p>首先我们使用weakMap代替先前的set作为桶的数据结构。因为需要一个key与effectFn的映射关系。<br>这里说一下WeakMap跟Map的区别</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">const map = new Map();</span><br><span class="line">const weakmap = new WeakMap();</span><br><span class="line">(function () &#123;</span><br><span class="line">  const foo = &#123; foo: 1 &#125;;</span><br><span class="line">  const bar = &#123; bar: 1 &#125;;</span><br><span class="line">  map.set(foo, 1);</span><br><span class="line">  weakmap.set(bar, 2);</span><br><span class="line">&#125;)();</span><br></pre></td></tr></table></figure>
+<p>我们创建了map，weakmap两个实例，在立即执行函数内部定义了foo，bar两个对象并且将这两个对象作为map，weakmap的key。函数执行结束后foo还作为key被map引用，因此它没有被垃圾回收器移除，还可以通过map.keys打印出来。而weakmap是弱引用，它不影响垃圾回收器的运作，所以执行完后bar会被垃圾回收器回收，我们也无法通过weakmap获取到bar。<br>所以使用weakmap常用于存储那些只有当key引用对象存在时才有价值的信息，如果使用map的话，绑定的数据不再被引用了，也不会被回收，最终可能会造成<strong>内存泄漏</strong>。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br></pre></td><td class="code"><pre><span class="line"> const bucket = new WeakMap();</span><br><span class="line"> const obj = new Proxy(data, &#123;</span><br><span class="line">   get(target, key) &#123;</span><br><span class="line">     track(target, key);</span><br><span class="line">     return target[key];</span><br><span class="line">   &#125;,</span><br><span class="line">   set(target, key, newVal) &#123;</span><br><span class="line">     target[key] = newVal;</span><br><span class="line">     trigger(target, key);</span><br><span class="line">   &#125;,</span><br><span class="line"> &#125;);</span><br><span class="line"></span><br><span class="line">function track(target, key) &#123;</span><br><span class="line">   //如果没有副作用函数直接return</span><br><span class="line">   if (!activeEffect) &#123;</span><br><span class="line">     return;</span><br><span class="line">   &#125;</span><br><span class="line">   //根据target从桶中取出desMap</span><br><span class="line">   let depsMap = bucket.get(target);</span><br><span class="line">   //如果desMap不存在那么创建一个Map并与target关联</span><br><span class="line">   if (!depsMap) &#123;</span><br><span class="line">     depsMap = new Map();</span><br><span class="line">     bucket.set(target, depsMap);</span><br><span class="line">   &#125;</span><br><span class="line">   //再根据key从desMap中取得deps，它里面存储着所有与当前key关联的副作用函数 effects</span><br><span class="line">   let deps = depsMap.get(key);</span><br><span class="line">   //如果deps不存在，同样创建一个Set并与key关联</span><br><span class="line">   if (!deps) &#123;</span><br><span class="line">     deps = new Set();</span><br><span class="line">     depsMap.set(key, deps);</span><br><span class="line">   &#125;</span><br><span class="line">   //最后将当前激活的副作用函数添加到桶里</span><br><span class="line">   deps.add(activeEffect);</span><br><span class="line"> &#125;</span><br><span class="line"></span><br><span class="line"> function trigger(target, key) &#123;</span><br><span class="line">   //根据target从桶中取出depsMap</span><br><span class="line">   const depsMap = bucket.get(target);</span><br><span class="line">   if (!depsMap) &#123;</span><br><span class="line">     return;</span><br><span class="line">   &#125;</span><br><span class="line">   //根据key取得所有副作用函数effects</span><br><span class="line">   const effects = depsMap.get(key);</span><br><span class="line">   //执行副作用函数</span><br><span class="line">   effects &amp;&amp; effects.forEach((fn) =&gt; fn());</span><br><span class="line"> &#125;</span><br></pre></td></tr></table></figure>
+
+<p>这段代码可以看出它的桶设计如下</p>
+<p><img src="https://img-blog.csdnimg.cn/186661b1f6164154801f6386257e0a4e.jpeg" alt="请添加图片描述"></p>
+<h2 id="分支切换跟cleanup"><a href="#分支切换跟cleanup" class="headerlink" title="分支切换跟cleanup"></a>分支切换跟cleanup</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">effect(function effectFn()&#123;</span><br><span class="line">  document.body.innerText = obj.ok ? obj.text : &quot;not&quot;;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<p>如果我们注册了这么一个副作用函数，当obj.ok为true时，会读取obj.text的值，所以这时候副作用函数会触发ok，text两个属性的读取操作，effectFn会与text,ok建立联系<br><img src="https://img-blog.csdnimg.cn/6b41a7de060d4a82ae4d9b260cab39ff.jpeg" alt="请添加图片描述"></p>
+<p>但当ok的值为false的时候，不会去读取obj.text，所以这个时候effectFn不应该被text的set收集，但在我们刚刚实现的响应系统里面，obj.ok变成false之后，effectFn还是在text的set里面。<br><img src="https://img-blog.csdnimg.cn/fb7aa0c63e6c49949f5e2014c0abf669.jpeg" alt="请添加图片描述"></p>
+<p>这种遗留的副作用函数会导致没必要的更新，obj.ok为false，无论text再怎么修改界面都是显示not，但text修改的时候却会触发effecnFn，这是多余的。为了解决这个问题，我们尝试副作用每次执行的时候把相关联的副作用函数从集合中删除。然后当副作用函数执行的时候，会重新建立联系，但新的联系中不会再包含遗留的没必要的集合。<br>要将一个副作用函数从所有与之有关联的集合中移除，就需要明确哪些集合中有它，因此我们需要重新设计下副作用函数注册器。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">function effect(fn) &#123;</span><br><span class="line">  const effectFn = () =&gt; &#123;</span><br><span class="line">      //当effectFn执行时，将其设置为当前激活的副作用函数</span><br><span class="line">    activeEffect = effectFn;</span><br><span class="line">    fn();</span><br><span class="line">  &#125;;</span><br><span class="line">  //activeEffect.deps用来存储所有与该副作用函数有关联的集合</span><br><span class="line">  effectFn.deps = [];</span><br><span class="line">  effectFn();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>然后再在track函数中，将集合push到effectFn.deps</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">function track(target, key) &#123;</span><br><span class="line">  if (!activeEffect) &#123;</span><br><span class="line">    return;</span><br><span class="line">  &#125;</span><br><span class="line">  let depsMap = bucket.get(target);</span><br><span class="line">  if (!depsMap) &#123;</span><br><span class="line">    depsMap = new Map();</span><br><span class="line">    bucket.set(target, depsMap);</span><br><span class="line">  &#125;</span><br><span class="line">  let deps = depsMap.get(key);</span><br><span class="line">  if (!deps) &#123;</span><br><span class="line">    deps = new Set();</span><br><span class="line">    depsMap.set(key, deps);</span><br><span class="line">  &#125;</span><br><span class="line">  deps.add(activeEffect);</span><br><span class="line">  //deps就是一个与当前副作用函数关联的集合，把它push到activeEffect.deps中</span><br><span class="line">  activeEffect.deps.push(deps);</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>有了副作用函数的集合对象，我们就可以在触发副作用函数的时候把该副作用函数从集合中移除了。下面通过实现一个cleanup函数来处理。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">function cleanup(effectFn) &#123;</span><br><span class="line">  for (let i = 0; i &lt; effectFn.deps.length; i++) &#123;</span><br><span class="line">    //将effectFn从集合中删除</span><br><span class="line">    const deps = effectFn.deps[i];</span><br><span class="line">    deps.delete(effectFn);</span><br><span class="line">  &#125;</span><br><span class="line">  effectFn.deps.length = 0;</span><br><span class="line">&#125;</span><br><span class="line">function effect(fn) &#123;</span><br><span class="line">  const effectFn = () =&gt; &#123;</span><br><span class="line">    cleanup(effectFn);</span><br><span class="line">    activeEffect = effectFn;</span><br><span class="line">    fn();</span><br><span class="line">  &#125;;</span><br><span class="line">  effectFn.deps = [];</span><br><span class="line">  effectFn();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这个时候运行代码会发现，副作用函数无限循环执行，这是因为trigger中我们遍历effects集合时，会调用cleanup清除，实际就是从effects中将当前正在调用的副作用函数清除，但副作用函数执行会让导致又被重新收集到集合中。<br>解决的方法也很简单，构造另一个Set集合遍历它即可。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">function trigger(target, key) &#123;</span><br><span class="line">  const depsMap = bucket.get(target);</span><br><span class="line">  if (!depsMap) &#123;</span><br><span class="line">    return;</span><br><span class="line">  &#125;</span><br><span class="line">  const effects = depsMap.get(key);</span><br><span class="line">  //new一个新的集合</span><br><span class="line">  const effectsToRun = new Set(effects);</span><br><span class="line">  effectsToRun &amp;&amp; effectsToRun.forEach((fn) =&gt; fn());</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>再执行就没有上面循环的问题了。</p>
+<h2 id="嵌套的effect与effect栈"><a href="#嵌套的effect与effect栈" class="headerlink" title="嵌套的effect与effect栈"></a>嵌套的effect与effect栈</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">effect(function effect1()&#123;</span><br><span class="line">   function effect2()&#123;</span><br><span class="line">       ...</span><br><span class="line">   &#125;</span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure>
+<p>这段代码中effect1嵌套了effect2，effect1，effect1的执行会导致effect2的执行。在vue中这种现象是很常见的，例如组件嵌套。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">const Bar = ()=&gt;&#123;    </span><br><span class="line">    render()&#123;&#125;</span><br><span class="line">&#125;</span><br><span class="line">const Foo = ()=&gt;&#123;</span><br><span class="line">  render()&#123;</span><br><span class="line">      return &lt;Bar/&gt;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>此时就发生了嵌套，相当于</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">effect(()=&gt;&#123;</span><br><span class="line">    Foo.render()</span><br><span class="line">    effect(()=&gt;&#123;</span><br><span class="line">        Bar.render()</span><br><span class="line">    &#125;)</span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure>
+<p>我们可以通过以下代码测试我们至今完成的响应系统是不是支持嵌套的</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">let t1,t2</span><br><span class="line">effect(() =&gt; &#123;</span><br><span class="line">  console.log(&quot;eff1&quot;);</span><br><span class="line">  effect(() =&gt; &#123;</span><br><span class="line">    console.log(&quot;eff2&quot;);</span><br><span class="line">    t2 = obj.ok;</span><br><span class="line">  &#125;);</span><br><span class="line">  t1 = obj.text;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<p>这种情况下我们希望修改obj.text的时候会打印eff1，接着再触发内部的副作用函数打印eff2。当实际上打印出来的是eff2。</p>
+<p><img src="https://img-blog.csdnimg.cn/afe73fa9f2014467adc764289c146717.jpeg" alt="请添加图片描述"></p>
+<p>可以看到，当前text的集合中没有副作用函数。</p>
+<p>这是因为我们通过activeEffect存储当前的副作用函数，<strong>这只能存储一个副作用函数，当发生嵌套副作用函数的时候，后面的副作用函数会把先前的副作用函数覆盖掉。</strong> 导致在注册完副作用函数后，text的集合其实是内部的副作用函数，所以在对其进行修改后，set操作中执行的副作用函数不会对text做get操作，cleanup之后不会重新add副作用函数到集合中，所以它的集合是空的。</p>
+<p>为了解决这个问题我们创建一个副作用函数栈effectStack，在副作用函数执行时，把当前的副作用函数压入栈中，并且始终让activeEffect指向顶部的副作用函数。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">const effectStack = [];</span><br><span class="line">  function effect(fn) &#123;</span><br><span class="line">  const effectFn = () =&gt; &#123;</span><br><span class="line">    cleanup(effectFn);</span><br><span class="line">    activeEffect = effectFn;</span><br><span class="line">    //在调用副作用函数之前将其压入栈中</span><br><span class="line">    effectStack.push(effectFn);</span><br><span class="line">    fn();</span><br><span class="line">    //当前副作用函数执行完成后，将其弹出栈，并让activeEffect还原到之前的值</span><br><span class="line">    effectStack.pop();</span><br><span class="line">    activeEffect = effectStack[effectStack.length - 1];</span><br><span class="line">  &#125;;</span><br><span class="line">  effectFn.deps = [];</span><br><span class="line">  effectFn();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://img-blog.csdnimg.cn/b90d82c6ca0d4dc18701954f77536322.jpeg" alt="请添加图片描述"></p>
+<p>修改obj.text的时候，触发外部副作用函数，将其压入栈底，再执行内部副作用函数压入到栈顶，执行后再将其弹出。</p>
+<p><img src="https://img-blog.csdnimg.cn/1c0ea4985e974565a1da31ab1cee4567.jpeg" alt="请添加图片描述"></p>
+<p>这样一来，响应式数据的属性就只会收集与其绑定的副作用函数。</p>
+<p><img src="https://img-blog.csdnimg.cn/99a539f9ad5c4211a9929f98e913aeab.jpeg" alt="请添加图片描述"></p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/JavaScript/" rel="tag"># JavaScript</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2023/02/01/%E6%B5%8F%E8%A7%88%E5%99%A8%E6%B8%B2%E6%9F%93%E9%A1%B5%E9%9D%A2%E6%97%B6%EF%BC%8C%E6%B8%B2%E6%9F%93%E8%BF%9B%E7%A8%8B%E5%81%9A%E4%BA%86%E4%BB%80%E4%B9%88/" rel="prev" title="浏览器渲染页面时，渲染进程做了什么">
+      <i class="fa fa-chevron-left"></i> 浏览器渲染页面时，渲染进程做了什么
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%89%AF%E4%BD%9C%E7%94%A8%E5%87%BD%E6%95%B0"><span class="nav-number">1.</span> <span class="nav-text">副作用函数</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%93%8D%E5%BA%94%E5%BC%8F%E6%95%B0%E6%8D%AE"><span class="nav-number">2.</span> <span class="nav-text">响应式数据</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%B3%A8%E5%86%8C%E5%89%AF%E4%BD%9C%E7%94%A8%E5%87%BD%E6%95%B0"><span class="nav-number">3.</span> <span class="nav-text">注册副作用函数</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%8C%E5%96%84%E5%AD%98%E6%94%BE%E5%89%AF%E4%BD%9C%E7%94%A8%E5%87%BD%E6%95%B0%E7%9A%84%E6%A1%B6%E7%9A%84%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84"><span class="nav-number">4.</span> <span class="nav-text">完善存放副作用函数的桶的数据结构</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%88%86%E6%94%AF%E5%88%87%E6%8D%A2%E8%B7%9Fcleanup"><span class="nav-number">5.</span> <span class="nav-text">分支切换跟cleanup</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B5%8C%E5%A5%97%E7%9A%84effect%E4%B8%8Eeffect%E6%A0%88"><span class="nav-number">6.</span> <span class="nav-text">嵌套的effect与effect栈</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="ZeHome"
+      src="/images/avatar.webp">
+  <p class="site-author-name" itemprop="name">ZeHome</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">14</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-tags">
+        <span class="site-state-item-count">6</span>
+        <span class="site-state-item-name">标签</span>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">ZeHome</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://muse.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

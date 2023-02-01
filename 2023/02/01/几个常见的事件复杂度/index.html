@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.2">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="介绍几个常见的事件复杂度">
+<meta property="og:type" content="article">
+<meta property="og:title" content="几个常见的时间复杂度">
+<meta property="og:url" content="http://example.com/2023/02/01/%E5%87%A0%E4%B8%AA%E5%B8%B8%E8%A7%81%E7%9A%84%E4%BA%8B%E4%BB%B6%E5%A4%8D%E6%9D%82%E5%BA%A6/index.html">
+<meta property="og:site_name" content="Blog by ZeHome">
+<meta property="og:description" content="介绍几个常见的事件复杂度">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2023-02-01T03:33:02.000Z">
+<meta property="article:modified_time" content="2023-02-01T03:40:02.281Z">
+<meta property="article:author" content="ZeHome">
+<meta property="article:tag" content="算法">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://example.com/2023/02/01/%E5%87%A0%E4%B8%AA%E5%B8%B8%E8%A7%81%E7%9A%84%E4%BA%8B%E4%BB%B6%E5%A4%8D%E6%9D%82%E5%BA%A6/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>几个常见的时间复杂度 | Blog by ZeHome</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Blog by ZeHome</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2023/02/01/%E5%87%A0%E4%B8%AA%E5%B8%B8%E8%A7%81%E7%9A%84%E4%BA%8B%E4%BB%B6%E5%A4%8D%E6%9D%82%E5%BA%A6/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.webp">
+      <meta itemprop="name" content="ZeHome">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Blog by ZeHome">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          几个常见的时间复杂度
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2023-02-01 11:33:02 / 修改时间：11:40:02" itemprop="dateCreated datePublished" datetime="2023-02-01T11:33:02+08:00">2023-02-01</time>
+            </span>
+
+          
+            <div class="post-description">介绍几个常见的事件复杂度</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="1-时间复杂度定义"><a href="#1-时间复杂度定义" class="headerlink" title="1.时间复杂度定义"></a>1.时间复杂度定义</h1><p>算法的时间复杂度是一个函数，它定性描述该算法的运行时间。这是一个代表算法输入值的字符串的长度的函数。时间复杂度常用大O符号表述，不包括这个函数的低阶项和首项系数。使用这种方式时，时间复杂度可被称为是渐近的，亦即考察输入值大小趋近无穷时的情况。<br>简单来说就是<strong>执行算法所需要的计算工作量</strong></p>
+<h1 id="2-计算时间复杂度"><a href="#2-计算时间复杂度" class="headerlink" title="2.计算时间复杂度"></a>2.计算时间复杂度</h1><h2 id="O-1"><a href="#O-1" class="headerlink" title="O(1)"></a>O(1)</h2><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">function</span> <span class="title function_">fn1</span>(<span class="params"></span>)&#123;</span><br><span class="line">	<span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="number">1</span>)</span><br><span class="line">	<span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="number">2</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>函数fn1运行的时候执行了两次console，所以它的时间复杂度是2，用O表示为O(2)，但对于<strong>常数</strong>项往往可以忽略不计，所以我们一般将<strong>常数项计算为1，就算是O(100)我们时间复杂度也用O(1)表示</strong>。</p>
+<h2 id="O-n"><a href="#O-n" class="headerlink" title="O(n)"></a>O(n)</h2><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">function</span> <span class="title function_">fn2</span>(<span class="params">n</span>)&#123;</span><br><span class="line">	<span class="keyword">for</span>(<span class="keyword">let</span> i =<span class="number">0</span>;i&lt;n;i++)&#123;</span><br><span class="line">		<span class="variable language_">console</span>.<span class="title function_">log</span>(n)</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>函数fn2执行的时候，首先for中的<code>let i  = 0 </code>执行了一次，接着执行<code>i &lt; 0</code>，然后执行console，再执行<code>i++</code>，以此类推到最后，<code>i&lt;0</code>将执行<strong>n+1次</strong>，<code>console</code>将执行<strong>n次</strong>，<code>i++</code>执行<strong>n次</strong>，加上一开始的<code>let i = 0</code>，一共是<strong>1+n+1+n+n = 3n+2次</strong>，即<strong>O(n)=常数*n+常数</strong>，当n达到一定数量后，第二部分的常数可以忽略不计，即<strong>O(n)=常数*n</strong>，将剩下的常数当作该系数的常数作为1，<strong>得到最终时间复杂度O(n)</strong></p>
+<h2 id="O-n-2"><a href="#O-n-2" class="headerlink" title="O($n^2$)"></a>O($n^2$)</h2><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">function</span> <span class="title function_">fn3</span>(<span class="params">n</span>)&#123;</span><br><span class="line">	<span class="keyword">for</span>(<span class="keyword">let</span> i = <span class="number">0</span>; i &lt; n;i ++)&#123;</span><br><span class="line">		<span class="keyword">for</span>(<span class="keyword">let</span> i = <span class="number">0</span>; i &lt; n; i++)&#123;</span><br><span class="line">			<span class="variable language_">console</span>.<span class="title function_">log</span>(n)</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>根据上面的方法，我们可以推断出fn3的执行时间为$1+n+1+n+n\times(1+n+1+n+1) =2n^2+5n+2$，根据刚提到的省略常量，以及将系数作为1处理则得到$n^2  +n$，当n达到一定值时，<strong>相对于$n^2$，n可忽略所以最终得到时间复杂度为O($n^2$)，当执行次数出现多个幂时，则取最高的，如$n^3+n^4+n^5+5$，则取$n^5$即可</strong></p>
+<h2 id="O-log-2-n"><a href="#O-log-2-n" class="headerlink" title="O(log$2^n$)"></a>O(log$2^n$)</h2><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">function</span> <span class="title function_">fn4</span>(<span class="params">n</span>)&#123;</span><br><span class="line">	<span class="keyword">for</span>(<span class="keyword">let</span> i =<span class="number">1</span>; i &lt; n; i*=<span class="number">2</span>)&#123;</span><br><span class="line">		<span class="variable language_">console</span>.<span class="title function_">log</span>(n)</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>fn4当传入参数n为8时，首先i = 1，小于8成立，执行循环体内代码1次，i * 2 = 2，小于8继续成立，循环体内代码执行次数加一，i <em>2 = 4，小于8成立继续，循环体内执行第3次，接着i <em>2 = 8，小于8不成立循环结束，一共执行了3次。得到**O(8) =3</em></em><br>**$2^3 = 8$，$3 = log2^8$**，由此可得到$O(8) = log2^8$</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E7%AE%97%E6%B3%95/" rel="tag"># 算法</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2023/02/01/%E7%AE%80%E5%8D%95%E4%BB%8B%E7%BB%8D%E4%B8%8B%E4%BB%80%E4%B9%88%E6%98%AFnginx%EF%BC%9F%E5%AE%83%E8%83%BD%E7%94%A8%E6%9D%A5%E5%81%9A%E4%BB%80%E4%B9%88%EF%BC%9F/" rel="prev" title="简单介绍下什么是nginx？它能用来做什么？">
+      <i class="fa fa-chevron-left"></i> 简单介绍下什么是nginx？它能用来做什么？
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2023/02/01/%E9%80%9A%E8%BF%87javascript%E4%B8%8Enode%E4%BB%A3%E7%A0%81%E5%AE%9E%E7%8E%B0JSONP%E8%A7%A3%E5%86%B3%E8%B7%A8%E5%9F%9F/" rel="next" title="通过javascript与node代码实现JSONP解决跨域">
+      通过javascript与node代码实现JSONP解决跨域 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#1-%E6%97%B6%E9%97%B4%E5%A4%8D%E6%9D%82%E5%BA%A6%E5%AE%9A%E4%B9%89"><span class="nav-number">1.</span> <span class="nav-text">1.时间复杂度定义</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#2-%E8%AE%A1%E7%AE%97%E6%97%B6%E9%97%B4%E5%A4%8D%E6%9D%82%E5%BA%A6"><span class="nav-number">2.</span> <span class="nav-text">2.计算时间复杂度</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#O-1"><span class="nav-number">2.1.</span> <span class="nav-text">O(1)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#O-n"><span class="nav-number">2.2.</span> <span class="nav-text">O(n)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#O-n-2"><span class="nav-number">2.3.</span> <span class="nav-text">O($n^2$)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#O-log-2-n"><span class="nav-number">2.4.</span> <span class="nav-text">O(log$2^n$)</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="ZeHome"
+      src="/images/avatar.webp">
+  <p class="site-author-name" itemprop="name">ZeHome</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">14</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-tags">
+        <span class="site-state-item-count">6</span>
+        <span class="site-state-item-name">标签</span>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">ZeHome</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://muse.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>
