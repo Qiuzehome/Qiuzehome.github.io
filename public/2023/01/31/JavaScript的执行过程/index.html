@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.2">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="我们都知道javascript的执行顺序是从上往下执行的，按照这个逻辑来看的话...">
+<meta property="og:type" content="article">
+<meta property="og:title" content="JavaScript的执行过程">
+<meta property="og:url" content="http://example.com/2023/01/31/JavaScript%E7%9A%84%E6%89%A7%E8%A1%8C%E8%BF%87%E7%A8%8B/index.html">
+<meta property="og:site_name" content="Blog by ZeHome">
+<meta property="og:description" content="我们都知道javascript的执行顺序是从上往下执行的，按照这个逻辑来看的话...">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/83926ae51ad344cca048f8d364684e2c.png">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/414c75a71655457aacdd72bcb084abd7.png">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/1bd25900c02e47da90ceac48f8029118.png">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/bb5981388ee14e4b8074511ba80c8e55.png">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/5f996353d8ab4fcba03b0bae4392de48.png">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/a0f4ba0fdfe94d72b96df4dab4bd4ca8.png">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/50cef8d8af0741918eaf5c9ee65495e0.png">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/edcea4de4b93412da8804a150943ba79.png">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/14c035155e1f49d18c48333c6d104ab9.png">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/b516bc03990c4f028dca58ce0f21dc87.png">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/3dde1f72f5954b558b18a9bfb8d5fd22.png">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/5e5fbfb6754746428ef37e6e7cdaf41d.png">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/325890b708154f1387f1aa824c9f2ef1.png">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/6a2ea5b8125042e28eb56c70ff468253.png">
+<meta property="og:image" content="https://static001.geekbang.org/resource/image/4f/af/4f9310c7da631fa5a57f871099bfbeaf.png">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/293992da0a1841b7adfb443d178c149a.png">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/c25c18fd2a374890a0faf4c3adda4353.png">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/7ca69ac17e9844bfb445d9765ddb152f.png">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/215a1bde974d44679b7a6c118666ced7.png">
+<meta property="article:published_time" content="2023-01-31T09:18:13.000Z">
+<meta property="article:modified_time" content="2023-02-01T03:51:59.554Z">
+<meta property="article:author" content="ZeHome">
+<meta property="article:tag" content="JavaScript">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://img-blog.csdnimg.cn/83926ae51ad344cca048f8d364684e2c.png">
+
+<link rel="canonical" href="http://example.com/2023/01/31/JavaScript%E7%9A%84%E6%89%A7%E8%A1%8C%E8%BF%87%E7%A8%8B/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>JavaScript的执行过程 | Blog by ZeHome</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Blog by ZeHome</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2023/01/31/JavaScript%E7%9A%84%E6%89%A7%E8%A1%8C%E8%BF%87%E7%A8%8B/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.webp">
+      <meta itemprop="name" content="ZeHome">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Blog by ZeHome">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          JavaScript的执行过程
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2023-01-31 17:18:13" itemprop="dateCreated datePublished" datetime="2023-01-31T17:18:13+08:00">2023-01-31</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2023-02-01 11:51:59" itemprop="dateModified" datetime="2023-02-01T11:51:59+08:00">2023-02-01</time>
+              </span>
+
+          
+            <div class="post-description">我们都知道javascript的执行顺序是从上往下执行的，按照这个逻辑来看的话...</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="1-执行上下文"><a href="#1-执行上下文" class="headerlink" title="1.执行上下文"></a>1.执行上下文</h2><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="title function_">showNum</span>()</span><br><span class="line"><span class="variable language_">console</span>.<span class="title function_">log</span>(mynum)</span><br><span class="line"><span class="keyword">var</span> mynum = <span class="string">&#x27;111&#x27;</span></span><br><span class="line"><span class="keyword">function</span> <span class="title function_">showNum</span>(<span class="params"></span>) &#123;</span><br><span class="line">    <span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="string">&#x27;111&#x27;</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<span id="more"></span>
+<p>我们都知道javascript的执行顺序是从上往下执行的，按照这个逻辑来看的话，这段代码第一行showNum还没定义，所以会报错，第二行mynum同理。然而结果是第一行输出111，第二行输出undefined，然而如果我们把声明的代码去掉的话，那它必然是报错的。</p>
+<p>由此我们可以得到几个结论</p>
+<ul>
+<li>1.在执行过程中，若用了未声明的变量，那么javascript执行会报错</li>
+<li>2.在一个变量定义之前使用它不会报错，但该值会变成undefined</li>
+<li>3.在一个函数声明之前使用它，能正常使用</li>
+</ul>
+<p>根据我们从上到下的执行顺序来看第一行很好理解，主要看下另外两条结论。</p>
+<h3 id="变量提升"><a href="#变量提升" class="headerlink" title="变量提升"></a>变量提升</h3><p>javascript在执行的时候，javascript引擎会自动把变量和函数声明的部分提升到代码开头，并且会给它设置一个默认值就是undefined</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> mynum = <span class="literal">undefined</span></span><br><span class="line"><span class="variable language_">console</span>.<span class="title function_">log</span>(mynum)</span><br><span class="line">mynum = <span class="string">&#x27;111&#x27;</span>;</span><br></pre></td></tr></table></figure>
+
+<p>所以我们在定义mynum的时候，并且将它输出的时候，它的代码执行顺序其实是这样的</p>
+<p>那么为什么showNum是可以输出111呢</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="title function_">fn1</span>();</span><br><span class="line"><span class="title function_">fn2</span>();</span><br><span class="line"><span class="keyword">function</span> <span class="title function_">fn1</span>(<span class="params"></span>)&#123;</span><br><span class="line">	<span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="string">&#x27;fn1&#x27;</span>)</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">var</span> fn2 = <span class="keyword">function</span>(<span class="params"></span>)&#123;</span><br><span class="line">    <span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="string">&#x27;fn2&#x27;</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><img src="https://img-blog.csdnimg.cn/83926ae51ad344cca048f8d364684e2c.png" alt="请添加图片描述"></p>
+<p>fn1是一个完整的函数声明，没涉及赋值的操作，而fn2是先声明fn2再把function赋值给它，因此fn2声明后被提升到前面时它的值是undefined，所以会报is not a function的错误</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="title function_">showNum</span>()</span><br><span class="line"><span class="variable language_">console</span>.<span class="title function_">log</span>(mynum)</span><br><span class="line"><span class="keyword">var</span> mynum = <span class="string">&#x27;111&#x27;</span></span><br><span class="line"><span class="keyword">function</span> <span class="title function_">showNum</span>(<span class="params"></span>) &#123;</span><br><span class="line">    <span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="string">&#x27;111&#x27;</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">//变量提升部分</span></span><br><span class="line"><span class="keyword">var</span> mynum = <span class="literal">undefined</span></span><br><span class="line"><span class="keyword">function</span> <span class="title function_">showNum</span>(<span class="params"></span>)&#123;</span><br><span class="line">    <span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="string">&#x27;111&#x27;</span>)</span><br><span class="line">&#125; </span><br><span class="line"><span class="comment">//执行部分</span></span><br><span class="line"><span class="title function_">showNum</span>()</span><br><span class="line"><span class="variable language_">console</span>.<span class="title function_">log</span>(mynum)</span><br><span class="line">mynum = <span class="string">&#x27;111&#x27;</span></span><br></pre></td></tr></table></figure>
+
+<p>实际上变量和函数声明里代码的位置是不会改变的，所谓的变量提升其实是在编译阶段被javascript引擎放到内存中，所以我们最初的那段代码经过编译后它是这样的</p>
+<p><img src="https://img-blog.csdnimg.cn/414c75a71655457aacdd72bcb084abd7.png" alt="请添加图片描述"></p>
+<p><strong>执行上下文是JavaScript执行一段代码时的运行环境</strong>，比如调用一个函数，就会进入这个函数的执行上下文，确定该函数在执行期间用到的诸如this、变量、对象以及函数等。</p>
+<h2 id="2-调用栈"><a href="#2-调用栈" class="headerlink" title="2.调用栈"></a>2.调用栈</h2><h3 id="函数调用"><a href="#函数调用" class="headerlink" title="函数调用"></a>函数调用</h3><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> a = <span class="number">2</span></span><br><span class="line"><span class="keyword">function</span> <span class="title function_">add</span>(<span class="params"></span>)&#123;</span><br><span class="line"><span class="keyword">var</span> b = <span class="number">10</span></span><br><span class="line"><span class="keyword">return</span>  a+b</span><br><span class="line">&#125;</span><br><span class="line"><span class="title function_">add</span>()</span><br></pre></td></tr></table></figure>
+
+<p>当我们执行上面这段代码的时候，代码中的a，add都会被保存在全局的执行上下文中，当执行到add( )时，javascript判断这是一个函数调用，于是会做出以下操作</p>
+<ul>
+<li>从全局执行上下文中取出add函数的代码</li>
+<li>对add函数这段代码进行编译，并创建该函数的执行上下文和可执行代码</li>
+<li>执行代码，输出结果<img src="https://img-blog.csdnimg.cn/1bd25900c02e47da90ceac48f8029118.png" alt="请添加图片描述"></li>
+</ul>
+<p>这个时候这段代码会拥有两段执行上下文，一段是全局的，一段是add函数的，也就是说在执行javascript的时候，可能存在多个执行上下文。而javascript就是通过栈来管理这些执行上下文的</p>
+<h3 id="JavaScript调用栈"><a href="#JavaScript调用栈" class="headerlink" title="JavaScript调用栈"></a>JavaScript调用栈</h3><p>在执行上下文创建好后，javascript会将执行上下文压入栈中，这种管理执行上下文的栈被称为执行上下文栈，也就是我们平时说的<strong>调用栈</strong>。</p>
+<p>观看下面这段相对复杂一点的代码的调用栈</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> a = <span class="number">1</span></span><br><span class="line"><span class="keyword">function</span> <span class="title function_">add_1</span> (b,c)&#123;</span><br><span class="line">    <span class="keyword">return</span> b+c</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">function</span> <span class="title function_">add_2</span>(<span class="params">b,c</span>)&#123;</span><br><span class="line">    <span class="keyword">var</span> d = <span class="number">4</span></span><br><span class="line">    <span class="keyword">var</span> e = <span class="title function_">add_1</span>(b,c)</span><br><span class="line">    <span class="keyword">return</span> a + e + d </span><br><span class="line">&#125;</span><br><span class="line"><span class="title function_">add_2</span>(<span class="number">2</span>,<span class="number">3</span>)</span><br></pre></td></tr></table></figure>
+<p><img src="https://img-blog.csdnimg.cn/bb5981388ee14e4b8074511ba80c8e55.png" alt="请添加图片描述"></p>
+<p>这里解释一下为什么<strong>add_2的执行上下文中e是undefined</strong>。其实在将其执行上下文压入调用栈中时，一开始这些变量的值根据我们前面说到的<strong>变量提升</strong>，都是<strong>undefined</strong>，是经过执行代码之后它们的值才发生了变化，而当我们执行到<strong>var e = add_1(b,c)<strong>的时候，代码执行了</strong>add_1</strong>方法，这时候在给它赋值之前需要<strong>先执行add_1函数，于是它还是undefined</strong>，当add_1执行结束之后其调用栈会变成这样。</p>
+<p><img src="https://img-blog.csdnimg.cn/5f996353d8ab4fcba03b0bae4392de48.png" alt="请添加图片描述"></p>
+<p>可以看到在add_1函数执行结束之后，它的执行上下文会从调用栈中弹出，并且将值返回给e。接着add_2执行完之后它的执行上下文也会从调用栈中弹出，只剩下全局执行上下文，到这里整个执行流程就结束了。</p>
+<blockquote>
+<p>在平时开发过程中，我们也可以通过控制台打断点的方式或者使用console.trace()来输出当前的函数调用关系</p>
+</blockquote>
+<h5 id="栈溢出"><a href="#栈溢出" class="headerlink" title="栈溢出"></a>栈溢出</h5><p><strong>调用栈是有大小的</strong>，当入栈的执行上下文超过一定数目，JavaScript引擎就会报错，我们把这种错误叫做<strong>栈溢出</strong>。</p>
+<p>就像这段代码，通过递归不断地向调用栈压入fn的执行上下文，导致入栈的执行上下文超过了它的限制，就会抛出栈溢出的错误</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">function</span> <span class="title function_">fn</span>(<span class="params">a</span>)&#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="title function_">fn</span>(a)</span><br><span class="line">&#125;</span><br><span class="line"><span class="title function_">fn</span>(a)</span><br></pre></td></tr></table></figure>
+<p><img src="https://img-blog.csdnimg.cn/a0f4ba0fdfe94d72b96df4dab4bd4ca8.png" alt="请添加图片描述"></p>
+<h2 id="3-块级作用域"><a href="#3-块级作用域" class="headerlink" title="3.块级作用域"></a>3.块级作用域</h2><p>javascript因为存在着我们之前讲到的变量提升这一特性，导致了它的一些执行方式不符合从上到下的执行顺序，所以es6中引入了块级作用域避开了这种缺陷，而在这之前javascript是只有全局作用域跟函数作用域。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//if块</span></span><br><span class="line"><span class="keyword">if</span>(<span class="number">1</span>)&#123;&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//while块</span></span><br><span class="line"><span class="keyword">while</span>(<span class="number">1</span>)&#123;&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//函数块</span></span><br><span class="line"><span class="keyword">function</span> <span class="title function_">foo</span>(<span class="params"></span>)&#123;</span><br><span class="line"> </span><br><span class="line"><span class="comment">//for循环块</span></span><br><span class="line"><span class="keyword">for</span>(<span class="keyword">let</span> i = <span class="number">0</span>; i&lt;<span class="number">100</span>; i++)&#123;&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//单独一个块</span></span><br><span class="line">&#123;&#125;</span><br></pre></td></tr></table></figure>
+
+<p>举个例子说一下没有块级作用域的缺陷</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">function</span> <span class="title function_">fn</span>(<span class="params"></span>)&#123;</span><br><span class="line">    <span class="keyword">for</span>(<span class="keyword">var</span> i =<span class="number">0</span>;i&lt;<span class="number">8</span>;i++)&#123;&#125;</span><br><span class="line">    <span class="variable language_">console</span>.<span class="title function_">log</span>(i)</span><br><span class="line">&#125;</span><br><span class="line"><span class="title function_">fn</span>()</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>按理想状态来说。for循环中的i在这段循环结束后应该是被销毁了，然而在这段代码中它没有被销毁，所以最后输出了8</p>
+<p>再看看通过let使用块级作用域的</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">function</span> <span class="title function_">fn</span>(<span class="params"></span>)&#123;</span><br><span class="line">    <span class="keyword">for</span>(<span class="keyword">let</span> i =<span class="number">0</span>;i&lt;<span class="number">8</span>;i++)&#123;&#125;</span><br><span class="line">    <span class="variable language_">console</span>.<span class="title function_">log</span>(i)</span><br><span class="line">&#125;</span><br><span class="line"><span class="title function_">fn</span>()</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>会发现下面输出i的时候报了not defined的错误，这种就非常<strong>符合我们的编程习惯了：作用块内声明的变量不影响块外面的变量</strong>。</p>
+<h3 id="JavaScript是如何支持块级作用域的"><a href="#JavaScript是如何支持块级作用域的" class="headerlink" title="JavaScript是如何支持块级作用域的"></a>JavaScript是如何支持块级作用域的</h3><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">function</span> <span class="title function_">fn</span>(<span class="params"></span>)&#123;</span><br><span class="line">    <span class="keyword">var</span> a = <span class="number">1</span></span><br><span class="line">    <span class="keyword">let</span> b = <span class="number">2</span></span><br><span class="line">    &#123;</span><br><span class="line">      <span class="keyword">let</span> b = <span class="number">3</span></span><br><span class="line">      <span class="keyword">var</span> c = <span class="number">4</span></span><br><span class="line">      <span class="keyword">let</span> d = <span class="number">5</span></span><br><span class="line">      <span class="variable language_">console</span>.<span class="title function_">log</span>(a)</span><br><span class="line">      <span class="variable language_">console</span>.<span class="title function_">log</span>(b)</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="variable language_">console</span>.<span class="title function_">log</span>(b) </span><br><span class="line">    <span class="variable language_">console</span>.<span class="title function_">log</span>(c)</span><br><span class="line">    <span class="variable language_">console</span>.<span class="title function_">log</span>(d)</span><br><span class="line">&#125;   </span><br><span class="line"><span class="title function_">fn</span>()</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p><img src="https://img-blog.csdnimg.cn/50cef8d8af0741918eaf5c9ee65495e0.png" alt="请添加图片描述"></p>
+<p>当进入函数的作用域块时，作用域块中通过let声明的变量，会被存放在词法环境的一个单独的区域中，这个区域中的变量并不影响作用域块外面的变量，比如在作用域外面声明了变量b，在该作用域块内部也声明了变量b，它们都是独立的存在。</p>
+<p>其实，在词法环境内部，维护了一个小型栈结构，栈底是函数最外层的变量，进入一个作用域块后，就会把该作用域块内部的变量压到栈顶；当作用域执行完成之后，该作用域的信息就会从栈顶弹出，这就是词法环境的结构。需要注意下，我这里所讲的变量是指通过let或者const声明的变量。</p>
+<p>当作用域块执行结束后，其内部定义的变量就会从词法环境中弹出，类似调用栈</p>
+<h2 id="4-作用域链"><a href="#4-作用域链" class="headerlink" title="4.作用域链"></a>4.作用域链</h2><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">function</span> <span class="title function_">fn1</span>(<span class="params"></span>)&#123;</span><br><span class="line">	<span class="variable language_">console</span>.<span class="title function_">log</span>(a)</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">function</span> <span class="title function_">fn2</span>(<span class="params"></span>)&#123;</span><br><span class="line">	<span class="keyword">var</span> a = <span class="number">2</span></span><br><span class="line">	<span class="title function_">fn1</span>()</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">var</span> a = <span class="number">1</span></span><br><span class="line"><span class="title function_">fn2</span>()</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>这段代码如果根据先前讲到的调用栈去分析的话，可能会觉得会从上往下去取到 fn2的执行上下文中的a，所以输出2，但其实不是这样的</p>
+<p>这里的作用域链如下<br><img src="https://img-blog.csdnimg.cn/edcea4de4b93412da8804a150943ba79.png" alt="请添加图片描述"><br>fn1，fn2的作用域链其实都是指向了全局，这是因为在JavaScript执行过程中，其作用域链是由<strong>词法作用域</strong>决定的。</p>
+<h3 id="词法作用域"><a href="#词法作用域" class="headerlink" title="词法作用域"></a>词法作用域</h3><p><strong>词法作用域就是指作用域是由代码中函数声明的位置来决定的，所以词法作用域是静态的作用域，通过它就能够预测代码在执行过程中如何查找标识符。</strong><br><img src="https://img-blog.csdnimg.cn/14c035155e1f49d18c48333c6d104ab9.png" alt="请添加图片描述"></p>
+<p>从图中可以看出，词法作用域就是根据代码的位置来决定的，其中main函数包含了bar函数，bar函数中包含了foo函数，因为JavaScript作用域链是由词法作用域决定的，所以整个词法作用域链的顺序是：foo函数作用域—&gt;bar函数作用域—&gt;main函数作用域—&gt;全局作用域。</p>
+<p>回去看先前的那段代码，fn1,fn2的上级作用域都是全局作用域，所以在这两个函数内用了一个它们没有定义的变量，那它们就会到全局作用域里面去找。也就是说，<strong>词法作用域是代码阶段就决定好的，和函数是怎么调用的没有关系</strong>。</p>
+<h3 id="闭包"><a href="#闭包" class="headerlink" title="闭包"></a>闭包</h3><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">function</span> <span class="title function_">fn</span>(<span class="params"></span>)&#123;</span><br><span class="line">    <span class="keyword">var</span> name =<span class="string">&#x27;a&#x27;</span></span><br><span class="line">    <span class="keyword">var</span> fn_name=&#123;</span><br><span class="line">        <span class="attr">getname</span>:<span class="keyword">function</span>(<span class="params"></span>)&#123;</span><br><span class="line">            <span class="keyword">return</span> name</span><br><span class="line">        &#125;,</span><br><span class="line">         <span class="attr">setname</span>:<span class="keyword">function</span>(<span class="params">new_name</span>)&#123;</span><br><span class="line">            name = new_name</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> fn_name</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">var</span> bar = <span class="title function_">fn</span>()</span><br><span class="line">bar.<span class="title function_">setname</span>(<span class="string">&#x27;b&#x27;</span>)</span><br><span class="line"><span class="variable language_">console</span>.<span class="title function_">log</span>(bar.<span class="title function_">getname</span>())</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p><strong>根据词法作用域的规则，内部函数getName和setName总是可以访问它们的外部函数fn中的变量name。</strong>虽然fn执行结束了，但是getname,setname依然可以使用fn中的变量name。所以<strong>fn执行结束后</strong>，它的整个调用栈其实是这样的<br><img src="https://img-blog.csdnimg.cn/b516bc03990c4f028dca58ce0f21dc87.png" alt="请添加图片描述"></p>
+<p>fn函数执行结束后其执行上下文会从调用栈中弹出，但由于返回的setname，getname保留了对fn内部name的引用，所以这个变量依然保留在内存中。这就像生成了一个setname，getname的专属包，因为除了它们其他任何地方都无法访问到，这个包就是所谓的闭包。</p>
+<p>当我们执行bar.setName(‘b’)的时候，javascript引擎会沿着<strong>当前执行上下文–&gt;fn函数闭包–&gt;全局执行上下文</strong>的顺序来查找变量</p>
+<h2 id="5-数据是如何存储的"><a href="#5-数据是如何存储的" class="headerlink" title="5.数据是如何存储的"></a>5.数据是如何存储的</h2><blockquote>
+<p>JavaScript的内存模型</p>
+</blockquote>
+<p>从图中可以看出， 在JavaScript的执行过程中， 主要有三种类型内存空间，分别是<strong>代码空间、栈空间</strong>和<strong>堆空间</strong>。这里的栈空间就是我们之前反复提及的调用栈，是用来存储执<img src="https://img-blog.csdnimg.cn/3dde1f72f5954b558b18a9bfb8d5fd22.png" alt="请添加图片描述"><br>行上下文的。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">function</span> <span class="title function_">fn</span>(<span class="params"></span>)&#123;</span><br><span class="line">    <span class="keyword">var</span> a = <span class="string">&#x27;a&#x27;</span>,</span><br><span class="line">        b = a,</span><br><span class="line">        c = &#123;<span class="attr">num</span>:<span class="number">3</span>&#125;,</span><br><span class="line">        d = c</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p><img src="https://img-blog.csdnimg.cn/5e5fbfb6754746428ef37e6e7cdaf41d.png" alt="请添加图片描述"></p>
+<p><strong>原始类型的数据值都是直接保存在“栈”中的，引用类型的值是存放在“堆”中的</strong>。</p>
+<p>JavaScript引擎需要用栈来维护程序执行期间上下文的状态，如果栈空间大了话，所有的数据都存放在栈空间里面，那么会影响到上下文切换的效率，进而又影响到整个程序的执行效率。比如文中的fn函数执行结束了，JavaScript引擎需要离开当前的执行上下文，只需要将指针下移到上个执行上下文的地址就可以了，fn函数执行上下文栈区空间全部回收。</p>
+<p>所以<strong>通常情况下，栈空间都不会设置太大，主要用来存放一些原始类型的小数据</strong>。而引用类型的数据占用的空间都比较大，所以这一类数据会被存放到堆中，<strong>堆空间很大，能存放很多大的数据</strong>，不过缺点是分配内存和回收内存都会占用一定的时间。</p>
+<p>在JavaScript中，赋值操作和其他语言有很大的不同，<strong>原始类型的赋值会完整复制变量值，而引用类型的赋值是复制引用地址</strong>。</p>
+<p>还有一种特殊情况是<strong>闭包，当执行到内部函数的时候，javascript引擎会对内部函数做一次词法扫描，当发现这是一个闭包的时候，会在堆空间创建一个closure的对象</strong>（这是一个内部对象，JavaScript是无法访问的），用来保存闭包用到的变量。<br><img src="https://img-blog.csdnimg.cn/325890b708154f1387f1aa824c9f2ef1.png" alt="请添加图片描述"></p>
+<p>总的来说，产生闭包的核心有两步：第一步是需要预扫描内部函数；第二步是把内部函数引用的外部变量保存到堆中。</p>
+<h2 id="6-垃圾回收"><a href="#6-垃圾回收" class="headerlink" title="6.垃圾回收"></a>6.垃圾回收</h2><p>有些数据被使用之后，可能就不再需要了，我们把这种数据称为<strong>垃圾数据</strong>。如果这些垃圾数据一直保存在内存中，那么内存会越用越多，所以我们需要<strong>对这些垃圾数据进行回收，以释放有限的内存空间</strong>。</p>
+<h3 id="调用栈中的数据是如何回收的"><a href="#调用栈中的数据是如何回收的" class="headerlink" title="调用栈中的数据是如何回收的"></a>调用栈中的数据是如何回收的</h3><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">function</span> <span class="title function_">fn</span> ()&#123;</span><br><span class="line">    <span class="keyword">var</span> a = <span class="number">1</span></span><br><span class="line">    <span class="keyword">var</span> b = &#123;<span class="attr">num</span>:<span class="number">1</span>&#125;</span><br><span class="line">    <span class="keyword">function</span> fn_in&#123;</span><br><span class="line">        <span class="keyword">var</span> c = <span class="number">3</span></span><br><span class="line">        <span class="keyword">var</span> d = &#123;<span class="attr">num</span>:<span class="number">4</span>&#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="title function_">fn_in</span>()</span><br><span class="line">&#125;</span><br><span class="line"><span class="title function_">fn</span>()</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>当执行到fn_in内的时候，其调用栈和对空间状态如下<br><img src="https://img-blog.csdnimg.cn/6a2ea5b8125042e28eb56c70ff468253.png" alt="请添加图片描述"></p>
+<p>与此同时，还有一个<strong>记录当前执行状态的指针（称为ESP）</strong>，指向调用栈中fn_in函数的执行上下文，表示当前正在执行fn_in函数。接着，当fn_in函数执行完成之后，函数执行流程就进入了fn函数，那这时就需要销毁fn_in函数的执行上下文了。ESP这时候就帮上忙了，JavaScript会将ESP下移到fn函数的执行上下文，<strong>这个下移操作就是销毁fn_in函数执行上下文的过程</strong>。</p>
+<h3 id="堆中的数据是如何回收的"><a href="#堆中的数据是如何回收的" class="headerlink" title="堆中的数据是如何回收的"></a>堆中的数据是如何回收的</h3><p>当上面那段代码的fn函数执行结束之后，ESP应该是指向全局执行上下文的，那这样的话，fn_in函数和fn函数的执行上下文就处于无效状态了，不过保存在堆中的两个对象依然占用着空间。<strong>要回收堆中的垃圾数据，就需要用到JavaScript中的垃圾回收器了</strong>。</p>
+<p>在V8中会把堆分为<strong>新生代</strong>和<strong>老生代</strong>两个区域，<strong>新生代中存放的是生存时间短的对象，老生代中存放的生存时间久的对象</strong>。</p>
+<p>新生区通常只支持1～8M的容量，而老生区支持的容量就大很多了。对于这两块区域，V8分别使用两个不同的垃圾回收器，以便更高效地实施垃圾回收。</p>
+<ul>
+<li><strong>副垃圾回收器，主要负责新生代的垃圾回收。</strong></li>
+<li><strong>主垃圾回收器，主要负责老生代的垃圾回收。</strong></li>
+</ul>
+<h3 id="工作流程"><a href="#工作流程" class="headerlink" title="工作流程"></a>工作流程</h3><p>其实<strong>不论什么类型的垃圾回收器，它们都有一套共同的执行流程</strong>。</p>
+<p>第一步是标记空间中活动对象和非活动对象。所谓活动对象就是还在使用的对象，非活动对象就是可以进行垃圾回收的对象。</p>
+<p>第二步是回收非活动对象所占据的内存。其实就是在所有的标记完成之后，统一清理内存中所有被标记为可回收的对象。</p>
+<p>第三步是做内存整理。一般来说，频繁回收对象后，内存中就会存在大量不连续空间，我们把这些不连续的内存空间称为<strong>内存碎片</strong>。当内存中出现了大量的内存碎片之后，如果需要分配较大连续内存的时候，就有可能出现内存不足的情况。所以最后一步需要整理这些内存碎片，但这步其实是可选的，因为有的垃圾回收器不会产生内存碎片，比如接下来我们要介绍的副垃圾回收器。</p>
+<h4 id="副垃圾回收器"><a href="#副垃圾回收器" class="headerlink" title="副垃圾回收器"></a>副垃圾回收器</h4><p>副垃圾回收器主要负责新生区的垃圾回收。而通常情况下，大多数小的对象都会被分配到新生区，所以说这个区域虽然不大，但是垃圾回收还是比较频繁的。</p>
+<p>新生代中用<strong>Scavenge算法</strong>来处理。所谓Scavenge算法，是把新生代空间对半划分为两个区域，一半是对象区域，一半是空闲区域，如下图所示：<br><img src="https://static001.geekbang.org/resource/image/4f/af/4f9310c7da631fa5a57f871099bfbeaf.png" alt="img" style="zoom:67%;" /><br>新加入的对象都会存放到对象区域，当对象区域快被写满时，就需要执行一次垃圾清理操作。</p>
+<p>在垃圾回收过程中，首先要对对象区域中的垃圾做标记；标记完成之后，就进入垃圾清理阶段，副垃圾回收器会把这些存活的对象复制到空闲区域中，同时它还会把这些对象有序地排列起来，所以这个复制过程，也就相当于完成了内存整理操作，复制后空闲区域就没有内存碎片了。</p>
+<p>完成复制后，对象区域与空闲区域进行角色翻转，也就是原来的对象区域变成空闲区域，原来的空闲区域变成了对象区域。这样就完成了垃圾对象的回收操作，同时这种<strong>角色翻转的操作还能让新生代中的这两块区域无限重复使用下去</strong>。</p>
+<p>由于新生代中采用的Scavenge算法，所以每次执行清理操作时，都需要将存活的对象从对象区域复制到空闲区域。但复制操作需要时间成本，如果新生区空间设置得太大了，那么每次清理的时间就会过久，所以<strong>为了执行效率，一般新生区的空间会被设置得比较小</strong>。</p>
+<p>也正是因为新生区的空间不大，所以很容易被存活的对象装满整个区域。为了解决这个问题，JavaScript引擎采用了<strong>对象晋升策略</strong>，也就是经过两次垃圾回收依然还存活的对象，会被移动到老生区中。</p>
+<h3 id="主垃圾回收器"><a href="#主垃圾回收器" class="headerlink" title="主垃圾回收器"></a>主垃圾回收器</h3><p>由于老生区的对象比较大，若要在老生区中使用Scavenge算法进行垃圾回收，复制这些大的对象将会花费比较多的时间，从而导致回收执行效率不高，同时还会浪费一半的空间。因而，主垃圾回收器是采用<strong>标记-清除（Mark-Sweep）</strong>的算法进行垃圾回收的。下面我们来看看该算法是如何工作的。</p>
+<p>首先是标记过程阶段。标记阶段就是从一组根元素开始，递归遍历这组根元素，在这个遍历过程中，能到达的元素称为<strong>活动对象</strong>，没有到达的元素就可以判断为<strong>垃圾数据</strong>。</p>
+<p>接下来就是垃圾的清除过程。它和副垃圾回收器的垃圾清除过程完全不同，你可以理解这个过程是清除掉红色标记数据的过程，可参考下图大致理解下其清除过程：<br><img src="https://img-blog.csdnimg.cn/293992da0a1841b7adfb443d178c149a.png" alt="请添加图片描述"></p>
+<p>上面的标记过程和清除过程就是标记-清除算法，不过对一块内存多次执行标记-清除算法后，会产生大量不连续的内存碎片。而碎片过多会导致大对象无法分配到足够的连续内存，于是又产生了另外一种算法——<strong>标记-整理（Mark-Compact）</strong>，这个标记过程仍然与标记-清除算法里的是一样的，但后续步骤不是直接对可回收对象进行清理，而是让所有存活的对象都向一端移动，然后直接清理掉端边界以外的内存。你可以参考下图：<br><img src="https://img-blog.csdnimg.cn/c25c18fd2a374890a0faf4c3adda4353.png" alt="请添加图片描述"></p>
+<h3 id="全停顿"><a href="#全停顿" class="headerlink" title="全停顿"></a>全停顿</h3><p>由于JavaScript是运行在主线程之上的，一旦执行垃圾回收算法，都需要将正在执行的JavaScript脚本暂停下来，待垃圾回收完毕后再恢复脚本执行。我们把这种行为叫做<strong>全停顿（Stop-The-World）</strong>。<br><img src="https://img-blog.csdnimg.cn/7ca69ac17e9844bfb445d9765ddb152f.png" alt="请添加图片描述"></p>
+<p>在V8新生代的垃圾回收中，因其空间较小，且存活对象较少，所以全停顿的影响不大，但老生代就不一样了。如果在执行垃圾回收的过程中，占用主线程时间过久，就像上面图片展示的那样，花费了200毫秒，在这200毫秒内，主线程是不能做其他事情的，这将会造成页面的卡顿现象。</p>
+<p>为了降低老生代的垃圾回收而造成的卡顿，V8将标记过程分为一个个的子标记过程，同时让垃圾回收标记和JavaScript应用逻辑交替进行，直到标记阶段完成，我们把这个算法称为<strong>增量标记（Incremental Marking）算法</strong>。如下图所示：<br><img src="https://img-blog.csdnimg.cn/215a1bde974d44679b7a6c118666ced7.png" alt="请添加图片描述">使用增量标记算法，可以把一个完整的垃圾回收任务拆分为很多小的任务，这些小的任务执行时间比较短，可以穿插在其他的JavaScript任务中间执行，这样当执行上述动画效果时，就不会让用户因为垃圾回收任务而感受到页面的卡顿了。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/JavaScript/" rel="tag"># JavaScript</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2023/01/31/%E7%94%A8Webpack%E6%90%AD%E5%BB%BA%E4%B8%80%E4%B8%AAReact%E9%A1%B9%E7%9B%AE/" rel="prev" title="用Webpack搭建一个React项目">
+      <i class="fa fa-chevron-left"></i> 用Webpack搭建一个React项目
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2023/02/01/%E8%B0%B7%E6%AD%8C%E6%B5%8F%E8%A7%88%E5%99%A8%E6%8F%92%E4%BB%B6%E5%BC%80%E5%8F%91/" rel="next" title="谷歌浏览器插件开发">
+      谷歌浏览器插件开发 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-%E6%89%A7%E8%A1%8C%E4%B8%8A%E4%B8%8B%E6%96%87"><span class="nav-number">1.</span> <span class="nav-text">1.执行上下文</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8F%98%E9%87%8F%E6%8F%90%E5%8D%87"><span class="nav-number">1.1.</span> <span class="nav-text">变量提升</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-%E8%B0%83%E7%94%A8%E6%A0%88"><span class="nav-number">2.</span> <span class="nav-text">2.调用栈</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%87%BD%E6%95%B0%E8%B0%83%E7%94%A8"><span class="nav-number">2.1.</span> <span class="nav-text">函数调用</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#JavaScript%E8%B0%83%E7%94%A8%E6%A0%88"><span class="nav-number">2.2.</span> <span class="nav-text">JavaScript调用栈</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%A0%88%E6%BA%A2%E5%87%BA"><span class="nav-number">2.2.0.1.</span> <span class="nav-text">栈溢出</span></a></li></ol></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-%E5%9D%97%E7%BA%A7%E4%BD%9C%E7%94%A8%E5%9F%9F"><span class="nav-number">3.</span> <span class="nav-text">3.块级作用域</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#JavaScript%E6%98%AF%E5%A6%82%E4%BD%95%E6%94%AF%E6%8C%81%E5%9D%97%E7%BA%A7%E4%BD%9C%E7%94%A8%E5%9F%9F%E7%9A%84"><span class="nav-number">3.1.</span> <span class="nav-text">JavaScript是如何支持块级作用域的</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-%E4%BD%9C%E7%94%A8%E5%9F%9F%E9%93%BE"><span class="nav-number">4.</span> <span class="nav-text">4.作用域链</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AF%8D%E6%B3%95%E4%BD%9C%E7%94%A8%E5%9F%9F"><span class="nav-number">4.1.</span> <span class="nav-text">词法作用域</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%97%AD%E5%8C%85"><span class="nav-number">4.2.</span> <span class="nav-text">闭包</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#5-%E6%95%B0%E6%8D%AE%E6%98%AF%E5%A6%82%E4%BD%95%E5%AD%98%E5%82%A8%E7%9A%84"><span class="nav-number">5.</span> <span class="nav-text">5.数据是如何存储的</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#6-%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6"><span class="nav-number">6.</span> <span class="nav-text">6.垃圾回收</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%B0%83%E7%94%A8%E6%A0%88%E4%B8%AD%E7%9A%84%E6%95%B0%E6%8D%AE%E6%98%AF%E5%A6%82%E4%BD%95%E5%9B%9E%E6%94%B6%E7%9A%84"><span class="nav-number">6.1.</span> <span class="nav-text">调用栈中的数据是如何回收的</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%A0%86%E4%B8%AD%E7%9A%84%E6%95%B0%E6%8D%AE%E6%98%AF%E5%A6%82%E4%BD%95%E5%9B%9E%E6%94%B6%E7%9A%84"><span class="nav-number">6.2.</span> <span class="nav-text">堆中的数据是如何回收的</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B7%A5%E4%BD%9C%E6%B5%81%E7%A8%8B"><span class="nav-number">6.3.</span> <span class="nav-text">工作流程</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%89%AF%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E5%99%A8"><span class="nav-number">6.3.1.</span> <span class="nav-text">副垃圾回收器</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%BB%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E5%99%A8"><span class="nav-number">6.4.</span> <span class="nav-text">主垃圾回收器</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%85%A8%E5%81%9C%E9%A1%BF"><span class="nav-number">6.5.</span> <span class="nav-text">全停顿</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="ZeHome"
+      src="/images/avatar.webp">
+  <p class="site-author-name" itemprop="name">ZeHome</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">14</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-tags">
+        <span class="site-state-item-count">6</span>
+        <span class="site-state-item-name">标签</span>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">ZeHome</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://muse.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

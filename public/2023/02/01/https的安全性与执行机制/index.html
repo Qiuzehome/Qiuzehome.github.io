@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.2">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="https是如何保障数据传输的安全性......">
+<meta property="og:type" content="article">
+<meta property="og:title" content="https的安全性与执行机制">
+<meta property="og:url" content="http://example.com/2023/02/01/https%E7%9A%84%E5%AE%89%E5%85%A8%E6%80%A7%E4%B8%8E%E6%89%A7%E8%A1%8C%E6%9C%BA%E5%88%B6/index.html">
+<meta property="og:site_name" content="Blog by ZeHome">
+<meta property="og:description" content="https是如何保障数据传输的安全性......">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2023-02-01T03:52:13.000Z">
+<meta property="article:modified_time" content="2023-02-01T03:53:06.052Z">
+<meta property="article:author" content="ZeHome">
+<meta property="article:tag" content="计算机网络">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://example.com/2023/02/01/https%E7%9A%84%E5%AE%89%E5%85%A8%E6%80%A7%E4%B8%8E%E6%89%A7%E8%A1%8C%E6%9C%BA%E5%88%B6/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>https的安全性与执行机制 | Blog by ZeHome</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Blog by ZeHome</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2023/02/01/https%E7%9A%84%E5%AE%89%E5%85%A8%E6%80%A7%E4%B8%8E%E6%89%A7%E8%A1%8C%E6%9C%BA%E5%88%B6/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.webp">
+      <meta itemprop="name" content="ZeHome">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Blog by ZeHome">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          https的安全性与执行机制
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2023-02-01 11:52:13 / 修改时间：11:53:06" itemprop="dateCreated datePublished" datetime="2023-02-01T11:52:13+08:00">2023-02-01</time>
+            </span>
+
+          
+            <div class="post-description">https是如何保障数据传输的安全性......</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="HTTP的安全性问题"><a href="#HTTP的安全性问题" class="headerlink" title="HTTP的安全性问题"></a>HTTP的安全性问题</h1><p>我们都知道前后端的通信是通过http协议去进行的，但是http的安全性却得不到保障。比如</p>
+<ul>
+<li><strong>前后端通信过程使用明文，内容可能会被窃听</strong></li>
+<li><strong>不验证对方身份，无法保证信息能准确发送给目标</strong></li>
+<li><strong>通信内容可能被篡改</strong><br>针对这些问题可由以下方法应对<h2 id="1-通过加密防止被窃听"><a href="#1-通过加密防止被窃听" class="headerlink" title="1.通过加密防止被窃听"></a>1.通过加密防止被窃听</h2><h4 id="1-通信加密"><a href="#1-通信加密" class="headerlink" title="(1)通信加密"></a>(1)通信加密</h4>HTTP中没有加密机制，但可以通过SSL(安全套接层)或TLS(安全传输层协议)的组合使用，加密HTTP的通信内容。<br>通过使用SSL建立安全通信线路之后，就可以通过这条安全通道进行HTTP通信了，这种HTTP与SSL的组合使用就是HTTPS，所以<strong>HTTPS不是一种新的协议，它使用的协议依然是HTTP</strong>。<h4 id="2-内容加密"><a href="#2-内容加密" class="headerlink" title="(2)内容加密"></a>(2)内容加密</h4>另一种防止被窃听的方法是对通信内容进行加密，客户端需要先对需要发送的内容进行加密后再发送，那么服务端想要拿到正确的通信内容的话那么服务端跟客户端<strong>都需要具备一样的加密解密机制</strong>。<h2 id="2-验证通信对方身份"><a href="#2-验证通信对方身份" class="headerlink" title="2.验证通信对方身份"></a>2.验证通信对方身份</h2>在HTTP中，只要服务端收到请求，都会返回一个响应，因此无法确认通信的对方的话会存在以下隐患。</li>
+<li>客户端无法确定请求是否正确的发送到服务器</li>
+<li>服务器无法确定响应是否正确返回到正确的客户端</li>
+<li>对于一些毫无意义的请求也会接收，存在安全性问题，如DOS攻击<br>HTTP无法确定通信对方，但是使用SSL的话则可以做到这一点，SSL不仅提供加密处理，还提供了一种称为证书的东西，可用于确定对方。<br>证书是由第三方发布的，可用于证明客户端，服务器是真实存在的，所以可以通过证书确认通信的对方是我们信息发送的目标。<h2 id="3-防止通信内容被第三方篡改"><a href="#3-防止通信内容被第三方篡改" class="headerlink" title="3.防止通信内容被第三方篡改"></a>3.防止通信内容被第三方篡改</h2>HTTP无法确认发出的请求/响应和收到的请求/响应前后是相同的。攻击者能够篡改请求和响应，让通信双方看上去通信过程仍是正常的。<h1 id="加密-认证-信息完整性-HTTPS"><a href="#加密-认证-信息完整性-HTTPS" class="headerlink" title="加密+认证+信息完整性 = HTTPS"></a>加密+认证+信息完整性 = HTTPS</h1>通常HTTP是直接与TCP通信，使用了SSL时则变成先与SSL通信，再由SSL与TCP通信。采用了这层SSL，HTTP就有了加密，证书，保证信息完整性等功能<h3 id="1-HTTPS是如何交换密钥的"><a href="#1-HTTPS是如何交换密钥的" class="headerlink" title="1.HTTPS是如何交换密钥的"></a>1.HTTPS是如何交换密钥的</h3>加密和解密都需要用到密钥，没密钥就无法加密解密，反过来任何人持有密钥都能加密解密，如果密钥被攻击者拿到了，那它就失去了意义。那么客户端怎么告诉服务端用什么密钥去解密，又避免被攻击者获取到就成了主要问题。<h4 id="共享密钥加密"><a href="#共享密钥加密" class="headerlink" title="共享密钥加密"></a>共享密钥加密</h4>共享密钥加密是指<strong>加密和解密都是用一个密钥</strong>进行处理，这种方式又叫做对称加密。用这种方法加密的好处是<strong>效率比较高</strong>，无需多余的处理。但它却有着通信过程中，<strong>存在密钥被攻击者获取的风险</strong>。<h4 id="公开密钥加密"><a href="#公开密钥加密" class="headerlink" title="公开密钥加密"></a>公开密钥加密</h4>公开密钥加密使用一对非对称的密钥，一把私有密钥，一把公开密钥。<br>私有密钥不能让其他人知道，公开密钥所有人都能知道。<br>使用这种方式加密，发送密文的一方<strong>用对方的公开密钥进行加密，对方收到被加密的信息后，再用自己私有的密钥进行解密</strong>。通过这种方式，不需要发送用来解密的私有密钥，也不用担心密钥被攻击者获取。但它也存在一个缺点就是处理速度比较慢。<h4 id="HTTPS采用混合加密机制"><a href="#HTTPS采用混合加密机制" class="headerlink" title="HTTPS采用混合加密机制"></a>HTTPS采用混合加密机制</h4>HTTPS为了提高效率，并且保证安全性将以上两种加密方法混合起来使用。先通过公开加密的方式获取到共享密钥加密所需要密钥之后，使用共享密钥加密的方式处理后续通信。</li>
+</ul>
+<ol>
+<li>客户端向服务端发送报文开始SSL通信。报文包括客户端支持的SSL版本，加密组件列表。</li>
+<li>服务端可进行SSL通信时，会返回一段报文。包含指定SSL版本与加密组件。这个加密组件是从客户端发送过来的加密组件列表中筛选出来的</li>
+<li>之后服务端再发送一段报文，包含公开密钥证书，确保客户端能够识别其正确性</li>
+<li>最后服务端再发送一段报文通知客户端SSL通信结束</li>
+<li>第一次SSL通信结束后，客户端以Client Key Exchange报文作为回应。包含通信加密中使用的一种Pre-master secret的随机密码串。改密码串是已经用步骤2跟3得到的公开密钥进行加密过的。</li>
+<li>接着客户端再发送Change Cipher Spec报文。告诉服务端后续通信会用Pre-master secret作为密钥进行加密</li>
+<li>客户端发送Finished报文，包含连接至今全部的整体校验值。这次协商能否成功取决于服务器能否正确解密该报文</li>
+<li>服务器像客户端一样发送Change Cipher Spec报文</li>
+<li>服务器像客户端一样发送Finished报文</li>
+<li>服务器客户端Finished报文交换完毕后，SSL就算建立成功。后续通信即使用HTTP即可</li>
+<li>应用层协议通信，即HTTP</li>
+</ol>
+<p><strong>至此就是一个HTTPS的工作流程。</strong>
+ </p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/" rel="tag"># 计算机网络</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2023/02/01/%E7%94%A8node%E5%AE%9E%E7%8E%B0cors%E8%B7%A8%E5%9F%9F/" rel="prev" title="用node实现cors跨域">
+      <i class="fa fa-chevron-left"></i> 用node实现cors跨域
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2023/02/01/%E7%A6%81%E6%AD%A2from%20disk%20cache/" rel="next" title="禁止from disk cache">
+      禁止from disk cache <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#HTTP%E7%9A%84%E5%AE%89%E5%85%A8%E6%80%A7%E9%97%AE%E9%A2%98"><span class="nav-number">1.</span> <span class="nav-text">HTTP的安全性问题</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-%E9%80%9A%E8%BF%87%E5%8A%A0%E5%AF%86%E9%98%B2%E6%AD%A2%E8%A2%AB%E7%AA%83%E5%90%AC"><span class="nav-number">1.1.</span> <span class="nav-text">1.通过加密防止被窃听</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-%E9%80%9A%E4%BF%A1%E5%8A%A0%E5%AF%86"><span class="nav-number">1.1.0.1.</span> <span class="nav-text">(1)通信加密</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-%E5%86%85%E5%AE%B9%E5%8A%A0%E5%AF%86"><span class="nav-number">1.1.0.2.</span> <span class="nav-text">(2)内容加密</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-%E9%AA%8C%E8%AF%81%E9%80%9A%E4%BF%A1%E5%AF%B9%E6%96%B9%E8%BA%AB%E4%BB%BD"><span class="nav-number">1.2.</span> <span class="nav-text">2.验证通信对方身份</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-%E9%98%B2%E6%AD%A2%E9%80%9A%E4%BF%A1%E5%86%85%E5%AE%B9%E8%A2%AB%E7%AC%AC%E4%B8%89%E6%96%B9%E7%AF%A1%E6%94%B9"><span class="nav-number">1.3.</span> <span class="nav-text">3.防止通信内容被第三方篡改</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%8A%A0%E5%AF%86-%E8%AE%A4%E8%AF%81-%E4%BF%A1%E6%81%AF%E5%AE%8C%E6%95%B4%E6%80%A7-HTTPS"><span class="nav-number">2.</span> <span class="nav-text">加密+认证+信息完整性 &#x3D; HTTPS</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-HTTPS%E6%98%AF%E5%A6%82%E4%BD%95%E4%BA%A4%E6%8D%A2%E5%AF%86%E9%92%A5%E7%9A%84"><span class="nav-number">2.0.1.</span> <span class="nav-text">1.HTTPS是如何交换密钥的</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%85%B1%E4%BA%AB%E5%AF%86%E9%92%A5%E5%8A%A0%E5%AF%86"><span class="nav-number">2.0.1.1.</span> <span class="nav-text">共享密钥加密</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%85%AC%E5%BC%80%E5%AF%86%E9%92%A5%E5%8A%A0%E5%AF%86"><span class="nav-number">2.0.1.2.</span> <span class="nav-text">公开密钥加密</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#HTTPS%E9%87%87%E7%94%A8%E6%B7%B7%E5%90%88%E5%8A%A0%E5%AF%86%E6%9C%BA%E5%88%B6"><span class="nav-number">2.0.1.3.</span> <span class="nav-text">HTTPS采用混合加密机制</span></a></li></ol></li></ol></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="ZeHome"
+      src="/images/avatar.webp">
+  <p class="site-author-name" itemprop="name">ZeHome</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">14</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-tags">
+        <span class="site-state-item-count">6</span>
+        <span class="site-state-item-name">标签</span>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">ZeHome</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://muse.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

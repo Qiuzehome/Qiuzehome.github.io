@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.2">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="浏览器通过网络进程，拿到数据给到渲染进程后......">
+<meta property="og:type" content="article">
+<meta property="og:title" content="浏览器渲染页面时，渲染进程做了什么">
+<meta property="og:url" content="http://example.com/2023/02/01/%E6%B5%8F%E8%A7%88%E5%99%A8%E6%B8%B2%E6%9F%93%E9%A1%B5%E9%9D%A2%E6%97%B6%EF%BC%8C%E6%B8%B2%E6%9F%93%E8%BF%9B%E7%A8%8B%E5%81%9A%E4%BA%86%E4%BB%80%E4%B9%88/index.html">
+<meta property="og:site_name" content="Blog by ZeHome">
+<meta property="og:description" content="浏览器通过网络进程，拿到数据给到渲染进程后......">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2023-02-01T03:58:13.000Z">
+<meta property="article:modified_time" content="2023-02-01T04:00:07.665Z">
+<meta property="article:author" content="ZeHome">
+<meta property="article:tag" content="其他">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://example.com/2023/02/01/%E6%B5%8F%E8%A7%88%E5%99%A8%E6%B8%B2%E6%9F%93%E9%A1%B5%E9%9D%A2%E6%97%B6%EF%BC%8C%E6%B8%B2%E6%9F%93%E8%BF%9B%E7%A8%8B%E5%81%9A%E4%BA%86%E4%BB%80%E4%B9%88/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>浏览器渲染页面时，渲染进程做了什么 | Blog by ZeHome</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Blog by ZeHome</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2023/02/01/%E6%B5%8F%E8%A7%88%E5%99%A8%E6%B8%B2%E6%9F%93%E9%A1%B5%E9%9D%A2%E6%97%B6%EF%BC%8C%E6%B8%B2%E6%9F%93%E8%BF%9B%E7%A8%8B%E5%81%9A%E4%BA%86%E4%BB%80%E4%B9%88/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.webp">
+      <meta itemprop="name" content="ZeHome">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Blog by ZeHome">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          浏览器渲染页面时，渲染进程做了什么
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2023-02-01 11:58:13 / 修改时间：12:00:07" itemprop="dateCreated datePublished" datetime="2023-02-01T11:58:13+08:00">2023-02-01</time>
+            </span>
+
+          
+            <div class="post-description">浏览器通过网络进程，拿到数据给到渲染进程后......</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>浏览器通过网络进程，如果最后解析到的数据格式是<strong>text/html</strong>，那么浏览器则会继续进行渲染流程。<br>每一个页面回对应一个渲染进程，每打开一个页面浏览器就会配套一个新的渲染进程。当渲染进程拿到浏览器进程传过来的数据后就可以开始进行渲染了。<br>![在这里插入图片描述](<a target="_blank" rel="noopener" href="https://img-blog.csdnimg.cn/47fdf7818bdb422abcde8703491de812.png">https://img-blog.csdnimg.cn/47fdf7818bdb422abcde8703491de812.png</a> =500x)<br>这里我们把渲染进程依据时间顺序分成以下几个步骤。<strong>构建DOM树、样式计算、布局阶段、分层、绘制、分块、光栅化和合成</strong>。</p>
+<h2 id="1-构建dom树"><a href="#1-构建dom树" class="headerlink" title="1.构建dom树"></a>1.构建dom树</h2><p>浏览器无法直接理解html，所以需要将html转换成浏览器能够理解的结构，即dom树。</p>
+<h2 id="2-计算样式"><a href="#2-计算样式" class="headerlink" title="2.计算样式"></a>2.计算样式</h2><p>计算样式的目的是得到dom节点中每个元素的样式，需要以下几步。</p>
+<ul>
+<li>将css转换成浏览器能理解的结构，styleSheets。</li>
+<li>转换样式表中的属性值，使其标准化。</li>
+<li>计算出dom节点中每个元素的样式。</li>
+</ul>
+<p>关于如何计算出dom节点中每个元素的样式，这涉及到<strong>CSS的继承规则和层叠规则</strong>了。<br>首先是CSS继承，CSS继承就是每个DOM节点都包含有父节点的样式，就像下图中的content_views，除了本身的样式，还继承了父节点的样式。<br>![在这里插入图片描述](<a target="_blank" rel="noopener" href="https://img-blog.csdnimg.cn/0600a760dd4046e899c0f572ff107fad.png">https://img-blog.csdnimg.cn/0600a760dd4046e899c0f572ff107fad.png</a> =500x)<br>至于层叠，层叠是CSS的一个基本特征，它是一个定义了如何合并来自多个源的属性值的算法。<br>我们可以在浏览器控制台element的Computed中看到对应dom最后计算得到的样式。<br>![在这里插入图片描述](<a target="_blank" rel="noopener" href="https://img-blog.csdnimg.cn/23bbcd8579cd432dbd42ec72efe53f2d.png">https://img-blog.csdnimg.cn/23bbcd8579cd432dbd42ec72efe53f2d.png</a> =500x)</p>
+<h2 id="3-布局阶段"><a href="#3-布局阶段" class="headerlink" title="3.布局阶段"></a>3.布局阶段</h2><p>有了dom树跟对应的样式，接下来需要计算出dom树中可见元素的位置，这个动作就是布局。</p>
+<h4 id="创建布局树"><a href="#创建布局树" class="headerlink" title="创建布局树"></a>创建布局树</h4><p>在页面中，不是所有dom节点都能看见的，像head，script，meta以及display:none的节点等。所以在显示之前，我们还要额外地构建一棵只<strong>包含可见元素布局树</strong>。<br>为了构建布局树，浏览器大体上完成了下面这些工作：</p>
+<ul>
+<li>遍历DOM树中的所有可见节点，并把这些节点加到布局中；</li>
+<li>而不可见的节点会被布局树忽略掉；<h4 id="计算布局"><a href="#计算布局" class="headerlink" title="计算布局"></a>计算布局</h4>在执行布局操作的时候，会把布局运算的结果重新写回布局树中。每个元素的具体位置信息。<h2 id="4-分层"><a href="#4-分层" class="headerlink" title="4.分层"></a>4.分层</h2>页面中有很多复杂的效果，如一些复杂的3D变换、页面滚动，z-index等，为了更加方便地实现这些效果，<strong>渲染引擎还需要为特定的节点生成专用的图层，并生成一棵对应的图层树。</strong><br>通过控制台的Layers，可以清晰地看到页面带分层。<br>![在这里插入图片描述](<a target="_blank" rel="noopener" href="https://img-blog.csdnimg.cn/1107ab5034e345d78f92493977c29539.png">https://img-blog.csdnimg.cn/1107ab5034e345d78f92493977c29539.png</a> =500x)<br>可见浏览器的页面实际上被分成了多个层面，最后叠加成我们最后看到的页面。<br>布局树跟图层树的关系如下<br>![在这里插入图片描述](<a target="_blank" rel="noopener" href="https://img-blog.csdnimg.cn/f68688e9538e4dd9bf664005bef5aef9.png">https://img-blog.csdnimg.cn/f68688e9538e4dd9bf664005bef5aef9.png</a> =700x)<br>一般情况下，不是每个节点都会包含一个图层，某个节点如果没有自己的图层那么它就会丛书父节点的图层，像上图中的span。想要<strong>生成新图层</strong>的话需要满足以下任意一个条件。</li>
+<li>拥有图层上下文属性（z-index，position，opacity等）</li>
+<li>需要裁剪的地方也会生成新图层</li>
+</ul>
+<p><em>关于什么是裁剪，比如我们写了一个dom，给了固定宽高，里面的内容超出了它的大小，这时候它的内容就会被渲染引擎裁剪一部分显示在dom中</em></p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">body</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">div</span>&gt;</span>111111111111111111<span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">body</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">style</span>&gt;</span><span class="language-css"></span></span><br><span class="line"><span class="language-css"><span class="selector-tag">div</span> &#123;</span></span><br><span class="line"><span class="language-css">    <span class="attribute">background-color</span>: <span class="number">#666666</span>;</span></span><br><span class="line"><span class="language-css">    <span class="attribute">width</span>: <span class="number">50px</span>;</span></span><br><span class="line"><span class="language-css">    <span class="attribute">height</span>: <span class="number">50px</span>;</span></span><br><span class="line"><span class="language-css">    <span class="attribute">overflow</span>: auto;</span></span><br><span class="line"><span class="language-css">&#125;</span></span><br><span class="line"><span class="language-css"></span><span class="tag">&lt;/<span class="name">style</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>![在这里插入图片描述](<a target="_blank" rel="noopener" href="https://img-blog.csdnimg.cn/0cf2d55a962a4defbeb848257a36716f.png">https://img-blog.csdnimg.cn/0cf2d55a962a4defbeb848257a36716f.png</a> =500x)</p>
+<h2 id="5-绘制"><a href="#5-绘制" class="headerlink" title="5.绘制"></a>5.绘制</h2><p>图层树构建完成后，渲染引擎会对每个图层进行绘制。渲染引擎会先把一个图层的绘制内容分成多个部分，将其组成一个绘制列表。我们可以通过控制台的Layers，选择对应的图层查看其绘制列表和过程<br>![在这里插入图片描述](<a target="_blank" rel="noopener" href="https://img-blog.csdnimg.cn/0655d515a2814a70abf6e412ce6ae366.png">https://img-blog.csdnimg.cn/0655d515a2814a70abf6e412ce6ae366.png</a> =700x)</p>
+<h2 id="6-分块"><a href="#6-分块" class="headerlink" title="6.分块"></a>6.分块</h2><p>绘制列表只是用于记录绘制顺序和指令，实际上做绘制的是渲染引擎中的合成线程操作的。主线程中绘制列表准备好后会将其提交给合成线程。<br>合成线程首先会将图层进行<strong>分块</strong>，因为<strong>一个页面往往一个屏幕的可见区域是装不下的，浏览器没必要一次性将整个图层绘制出来，这时候就会先将其分块</strong>。合成线程再优先对可见区域附近的图块进行绘制生成位图（<em>是由像素的单个点组成的图像</em>）。</p>
+<h2 id="7-光栅化"><a href="#7-光栅化" class="headerlink" title="7.光栅化"></a>7.光栅化</h2><p><strong>实际生成位图的操作是由栅格化来执行的</strong>。所谓栅格化，是指将图块转换为位图。渲染进程维护了一个栅格化的线程池，所有的图块栅格化都是在线程池内执行的。<br>栅格化过程都会使用GPU来加速生成，使用GPU生成位图的过程叫快速栅格化，或者GPU栅格化，生成的位图被保存在GPU内存中。<br>GPU操作是运行在GPU进程中，如果栅格化操作使用了GPU，那么最终生成位图的操作是在GPU中完成的，这就涉及到了跨进程操作。具体形式你可以参考下图：<br>![在这里插入图片描述](<a target="_blank" rel="noopener" href="https://img-blog.csdnimg.cn/be3acee75f584d1a8c86452dc0ce2036.png">https://img-blog.csdnimg.cn/be3acee75f584d1a8c86452dc0ce2036.png</a> =500x)</p>
+<h2 id="8-合成"><a href="#8-合成" class="headerlink" title="8.合成"></a>8.合成</h2><p>一旦所有图块都栅格化完成，合成线程（渲染进程）就会生成一个DrawQuad命令告知浏览器进程，浏览器进程里面有一个叫viz的组件，用来接收合成线程发过来的DrawQuad命令，然后根据DrawQuad命令，将其页面内容绘制到内存中，最后再将内存显示在屏幕上。至此渲染流程完毕。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>整个渲染流程可以概括如下<br>![在这里插入图片描述](<a target="_blank" rel="noopener" href="https://img-blog.csdnimg.cn/7b725ff5019c437fa4fc37a246c3fb2a.png">https://img-blog.csdnimg.cn/7b725ff5019c437fa4fc37a246c3fb2a.png</a> =500x)</p>
+<ul>
+<li>1.渲染进程将HTML转换为DOM树。</li>
+<li>2.渲染引擎将CSS转化为styleSheets，计算出DOM节点的样式。</li>
+<li>3.创建布局树，并计算元素的布局信息。</li>
+<li>4.对布局树进行分层，并生成分层树。</li>
+<li>5.为每个图层生成绘制列表，并将其提交到合成线程。</li>
+<li>6.合成线程将图层分成图块，并在光栅化线程池中将图块转换成位图。</li>
+<li>7.合成线程发送绘制图块命令DrawQuad给浏览器进程。</li>
+<li>8.浏览器进程根据DrawQuad消息生成页面，并显示到显示器上。</li>
+</ul>
+<h2 id="拓展"><a href="#拓展" class="headerlink" title="拓展"></a>拓展</h2><h4 id="回流重绘"><a href="#回流重绘" class="headerlink" title="回流重绘"></a>回流重绘</h4><p>回到我们老生常谈的<strong>回流，重绘</strong>。在了解了页面的渲染流程之后相信会对回流重绘会有更好的理解。<br>当我们修改了dom的宽高导致回流，需要更新完整的渲染流水线，所以开销也是最大的。从整个流程上来看，它<strong>不需要进行构建dom树，而是从构建styleSheets这一步修改其更改的样式后继续走完整个渲染流程</strong>，而重绘呢。<br>当我们修改了dom的颜色导致重绘，渲染流程也不需要重新构建dom树，但还是会修改styleSheets，但是由于没有<strong>改变dom的几何属性会跳过布局阶段，再走完成功渲染流程，所以其消耗比回流小</strong>。</p>
+<h4 id="合成"><a href="#合成" class="headerlink" title="合成"></a>合成</h4><p>除了回流重绘，还有一种操作叫做合成。它不需要绘制与合成，所以渲染引擎将跳过布局跟绘制，执行最后的合成操作即可。当我们在css中使用了transform便可以达到这种效果，直接在非主线程上执行合成动画操作。<strong>所以相对于重绘和重排，合成能大大提升绘制效率</strong>。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E5%85%B6%E4%BB%96/" rel="tag"># 其他</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2023/02/01/facebook%E7%AC%AC%E4%B8%89%E6%96%B9%E7%99%BB%E5%BD%95%E6%96%B9%E6%A1%88/" rel="prev" title="facebook第三方登录方案（javascript SDK）">
+      <i class="fa fa-chevron-left"></i> facebook第三方登录方案（javascript SDK）
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2023/02/01/vue3%E5%93%8D%E5%BA%94%E7%B3%BB%E7%BB%9F%E7%9A%84%E4%BD%9C%E7%94%A8%E4%B8%8E%E5%AE%9E%E7%8E%B0/" rel="next" title="vue3响应系统的作用与实现">
+      vue3响应系统的作用与实现 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-%E6%9E%84%E5%BB%BAdom%E6%A0%91"><span class="nav-number">1.</span> <span class="nav-text">1.构建dom树</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-%E8%AE%A1%E7%AE%97%E6%A0%B7%E5%BC%8F"><span class="nav-number">2.</span> <span class="nav-text">2.计算样式</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-%E5%B8%83%E5%B1%80%E9%98%B6%E6%AE%B5"><span class="nav-number">3.</span> <span class="nav-text">3.布局阶段</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%88%9B%E5%BB%BA%E5%B8%83%E5%B1%80%E6%A0%91"><span class="nav-number">3.0.1.</span> <span class="nav-text">创建布局树</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%AE%A1%E7%AE%97%E5%B8%83%E5%B1%80"><span class="nav-number">3.0.2.</span> <span class="nav-text">计算布局</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-%E5%88%86%E5%B1%82"><span class="nav-number">4.</span> <span class="nav-text">4.分层</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#5-%E7%BB%98%E5%88%B6"><span class="nav-number">5.</span> <span class="nav-text">5.绘制</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#6-%E5%88%86%E5%9D%97"><span class="nav-number">6.</span> <span class="nav-text">6.分块</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#7-%E5%85%89%E6%A0%85%E5%8C%96"><span class="nav-number">7.</span> <span class="nav-text">7.光栅化</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#8-%E5%90%88%E6%88%90"><span class="nav-number">8.</span> <span class="nav-text">8.合成</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">9.</span> <span class="nav-text">总结</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%8B%93%E5%B1%95"><span class="nav-number">10.</span> <span class="nav-text">拓展</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%9B%9E%E6%B5%81%E9%87%8D%E7%BB%98"><span class="nav-number">10.0.1.</span> <span class="nav-text">回流重绘</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%90%88%E6%88%90"><span class="nav-number">10.0.2.</span> <span class="nav-text">合成</span></a></li></ol></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="ZeHome"
+      src="/images/avatar.webp">
+  <p class="site-author-name" itemprop="name">ZeHome</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">14</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-tags">
+        <span class="site-state-item-count">6</span>
+        <span class="site-state-item-name">标签</span>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">ZeHome</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://muse.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>
